@@ -10,40 +10,44 @@ export function adminTemplate(data: ContactEmailData) {
 
 <meta charset="UTF-8">
 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>New Website Enquiry</title>
+
 </head>
 
-<body style="margin:0;padding:40px;background:#0f172a;font-family:Arial,sans-serif;">
+<body style="
+margin:0;
+padding:40px;
+background:#f1f5f9;
+font-family:Arial,Helvetica,sans-serif;
+">
 
 <table
-width="700"
 align="center"
+width="700"
 style="
-background:#111827;
+background:#ffffff;
 border-radius:18px;
 overflow:hidden;
-border:1px solid #1e293b;
+border:1px solid #e2e8f0;
 ">
 
 <tr>
 
 <td
 style="
-padding:30px;
-background:linear-gradient(90deg,#2563eb,#0891b2);
+background:linear-gradient(90deg,#1d4ed8,#0891b2);
+padding:35px;
 color:white;
-"
->
+">
 
 <h1 style="margin:0;font-size:32px;">
-
-TRFSK
-
+TRFSK OMKAR SERVICES PVT LTD
 </h1>
 
-<p style="margin-top:8px;font-size:14px;opacity:.9;">
-
-Business Education • Financial Awareness • Professional Networking
-
+<p style="margin-top:8px;font-size:15px;opacity:.9;">
+Professional Website Lead Notification
 </p>
 
 </td>
@@ -52,71 +56,128 @@ Business Education • Financial Awareness • Professional Networking
 
 <tr>
 
-<td style="padding:40px;">
+<td style="padding:35px;">
 
-<h2 style="color:white;">
-
-New Website Inquiry
-
+<h2 style="margin-top:0;color:#0f172a;">
+📩 New Website Enquiry
 </h2>
 
-<table width="100%" cellpadding="12">
+<table
+width="100%"
+cellpadding="12"
+style="
+border-collapse:collapse;
+margin-top:25px;
+">
 
 <tr>
 
-<td style="color:#94a3b8;width:180px;">Name</td>
+<td style="
+width:180px;
+background:#f8fafc;
+font-weight:bold;
+">
+Name
+</td>
 
-<td style="color:white;">${data.name}</td>
+<td>
+${data.name}
+</td>
 
 </tr>
 
 <tr>
 
-<td style="color:#94a3b8;">Email</td>
+<td style="background:#f8fafc;font-weight:bold;">
+Email
+</td>
 
-<td style="color:white;">${data.email}</td>
-
-</tr>
-
-<tr>
-
-<td style="color:#94a3b8;">Phone</td>
-
-<td style="color:white;">${data.phone || "-"}</td>
+<td>
+${data.email}
+</td>
 
 </tr>
 
 <tr>
 
-<td style="color:#94a3b8;">Company</td>
+<td style="background:#f8fafc;font-weight:bold;">
+Phone
+</td>
 
-<td style="color:white;">${data.company || "-"}</td>
+<td>
+${data.phone || "-"}
+</td>
 
 </tr>
 
 <tr>
 
-<td style="color:#94a3b8;">Subject</td>
+<td style="background:#f8fafc;font-weight:bold;">
+Company
+</td>
 
-<td style="color:white;">${data.subject || "General Inquiry"}</td>
+<td>
+${data.company || "-"}
+</td>
+
+</tr>
+
+<tr>
+
+<td style="background:#f8fafc;font-weight:bold;">
+Subject
+</td>
+
+<td>
+${data.subject || "General Enquiry"}
+</td>
 
 </tr>
 
 </table>
 
-<div
-style="
-margin-top:30px;
+<div style="
+margin-top:35px;
+background:#f8fafc;
 padding:25px;
-background:#0f172a;
-border-radius:12px;
-border-left:4px solid #2563eb;
-color:#e2e8f0;
+border-left:5px solid #2563eb;
+border-radius:10px;
+">
+
+<h3 style="margin-top:0;color:#0f172a;">
+Customer Message
+</h3>
+
+<p style="
 line-height:30px;
-"
->
+font-size:15px;
+color:#334155;
+white-space:pre-line;
+">
 
 ${data.message}
+
+</p>
+
+</div>
+
+<div style="
+margin-top:35px;
+padding:20px;
+background:#ecfeff;
+border-radius:10px;
+border:1px solid #a5f3fc;
+">
+
+<strong>Reply directly to this email.</strong>
+
+<p style="margin-bottom:0;">
+The Reply button will automatically send your response to
+
+<strong>${data.email}</strong>
+
+because Reply-To has already been configured.
+</p>
 
 </div>
 
@@ -126,17 +187,32 @@ ${data.message}
 
 <tr>
 
-<td
-style="
+<td style="
+background:#0f172a;
 padding:25px;
-background:#020617;
-color:#64748b;
-font-size:12px;
+color:#cbd5e1;
+font-size:13px;
 text-align:center;
-"
->
+">
 
-Generated automatically from TRFSK Website.
+Generated automatically by
+
+<strong>TRFSK Website Automation System</strong>
+
+<br><br>
+
+Website:
+https://www.trfskomkar.com
+
+<br>
+
+Customer Care:
+care@trfskomkar.com
+
+<br>
+
+Partners:
+partners@trfskomkar.com
 
 </td>
 

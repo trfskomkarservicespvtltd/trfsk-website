@@ -9,25 +9,32 @@ import {
 import Reveal from "./ui/Reveal";
 import Button from "./ui/Button";
 
+const phoneNumbers = [
+  "+91 81693 02861",
+  "+91 92263 93837",
+  "+91 70663 93830",
+  "+91 70663 93831",
+];
+
 export default function Contact() {
   const contactInfo = [
     {
       icon: Mail,
       title: "Email Us",
-      value: "contact@trfsk.com",
+      value: "info@trfskomkar.com",
       description: "Send us your enquiry anytime.",
     },
     {
       icon: Phone,
       title: "Call Us",
-      value: "+91 XXXXX XXXXX",
+      value: phoneNumbers,
       description: "Monday to Saturday",
     },
     {
       icon: MapPin,
       title: "Office",
-      value: "Maharashtra, India",
-      description: "Serving clients across India.",
+      value: "Pune, Maharashtra",
+      description: "DNK Business Bay, Katraj - Kondhwa Rd, Katraj, 411046",
     },
     {
       icon: Clock,
@@ -95,9 +102,19 @@ export default function Contact() {
                     {item.title}
                   </h3>
 
-                  <p className="mt-3 font-medium text-blue-400">
-                    {item.value}
-                  </p>
+                  {Array.isArray(item.value) ? (
+                    <div className="mt-3 space-y-1">
+                      {item.value.map((v) => (
+                        <p key={v} className="font-medium text-blue-400">
+                          {v}
+                        </p>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-3 font-medium text-blue-400">
+                      {item.value}
+                    </p>
+                  )}
 
                   <p className="mt-2 text-sm leading-6 text-slate-400">
                     {item.description}

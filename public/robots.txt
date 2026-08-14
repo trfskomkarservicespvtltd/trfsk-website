@@ -1,9 +1,8 @@
 User-agent: *
 Allow: /
 Disallow: /api/
-Disallow: /.next/
 
-Sitemap: https://trfsk.com/sitemap.xml
+Sitemap: https://trfskomkar.com/sitemap.xml
 
 # Block AI crawlers
 User-agent: CCBot

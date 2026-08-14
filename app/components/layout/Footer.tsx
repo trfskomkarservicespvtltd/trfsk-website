@@ -6,9 +6,22 @@ import {
   FaFacebook,
   FaYoutube,
   FaInstagram,
+  FaWhatsapp,
+  FaPinterest,
 } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 
 import NewsletterSignup from "../ui/NewsletterSignup";
+
+const socialLinks = [
+  { icon: FaLinkedin, href: "https://www.linkedin.com/in/santosh-maruti-shendkar-501355345", label: "LinkedIn" },
+  { icon: FaFacebook, href: "https://www.facebook.com/trfskomkar", label: "Facebook" },
+  { icon: FaInstagram, href: "https://www.instagram.com/trfskomkar/", label: "Instagram" },
+  { icon: FaYoutube, href: "https://youtube.com/@omkarservice-s", label: "YouTube" },
+  { icon: FaXTwitter, href: "https://x.com/omkarenter66396", label: "X (Twitter)" },
+  { icon: FaPinterest, href: "https://pin.it/2TC8lYiZ8", label: "Pinterest" },
+  { icon: FaWhatsapp, href: "https://wa.me/917066393830", label: "WhatsApp" },
+];
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -39,35 +52,23 @@ export default function Footer() {
 
             </p>
 
-            <div className="mt-8 flex gap-4">
+            <div className="mt-8 flex flex-wrap gap-4">
 
-              <a
-                href="#"
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-800 transition hover:bg-blue-600"
-              >
-                <FaLinkedin />
-              </a>
-
-              <a
-                href="#"
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-800 transition hover:bg-blue-600"
-              >
-                <FaFacebook />
-              </a>
-
-              <a
-                href="#"
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-800 transition hover:bg-blue-600"
-              >
-                <FaYoutube />
-              </a>
-
-              <a
-                href="#"
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-800 transition hover:bg-blue-600"
-              >
-                <FaInstagram />
-              </a>
+              {socialLinks.map((social) => {
+                const Icon = social.icon;
+                return (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={social.label}
+                    className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-800 transition hover:bg-blue-600"
+                  >
+                    <Icon />
+                  </a>
+                );
+              })}
 
             </div>
 
@@ -183,9 +184,30 @@ export default function Footer() {
 
         </div>
 
+        {/* Contact strip */}
+
+        <div className="mt-16 grid gap-6 border-t border-slate-800 pt-10 text-sm text-slate-400 sm:grid-cols-3">
+          <div>
+            <p className="font-semibold text-slate-300">Email</p>
+            <a href="mailto:care@trfskomkar.com" className="mt-1 block hover:text-blue-400">
+              care@trfskomkar.com
+            </a>
+          </div>
+          <div>
+            <p className="font-semibold text-slate-300">Phone</p>
+            <a href="tel:+918169302861" className="mt-1 block hover:text-blue-400">
+              +91 81693 02861
+            </a>
+          </div>
+          <div>
+            <p className="font-semibold text-slate-300">Office</p>
+            <p className="mt-1">Katraj, Pune, Maharashtra 411046</p>
+          </div>
+        </div>
+
         {/* Newsletter */}
 
-        <div className="mt-20 rounded-3xl border border-slate-800 bg-slate-900/60 p-10">
+        <div className="mt-16 rounded-3xl border border-slate-800 bg-slate-900/60 p-10">
 
           <div className="grid gap-8 lg:grid-cols-2">
 

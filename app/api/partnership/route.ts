@@ -6,12 +6,23 @@ import { Database } from "@/app/lib/database";
 import { createLead } from "@/app/lib/lead";
 import { saveWebsiteLead } from "@/app/lib/zoho";
 
-import { sendAutoReply } from "@/app/lib/mail";
+import {
+  sendAutoReply,
+  sendContactEmail,
+} from "@/app/lib/mail";
 
-const NewsletterSchema = z.object({
-
-  email: z.email("Invalid email address"),
-
+const PartnershipSchema = z.object({
+  name: z.string().min(2, "Name is required"),
+  email: z.email("Invalid email"),
+  phone: z.string().optional(),
+  company: z.string().optional(),
+  subject: z.string().optional(),
+  type: z.enum([
+    "general",
+    "partnership",
+    "support",
+  ]).optional(),
+  message: z.string().min(10),
 });
 
 export async function POST(
@@ -22,28 +33,36 @@ export async function POST(
 
     const body = await request.json();
 
-    const data = NewsletterSchema.parse(body);
+    const validatedData =
+      PartnershipSchema.parse(body);
 
     const lead = createLead({
 
-      source: "NEWSLETTER",
+      source: "PARTNERSHIP",
 
-      email: data.email,
+      name: validatedData.name,
 
-      subject: "Newsletter Subscription",
+      email: validatedData.email,
 
-      message:
-        "User subscribed to the TRFSK Newsletter.",
+      phone: validatedData.phone,
+
+      company: validatedData.company,
+
+      subject:
+        validatedData.subject ||
+        "Partnership Enquiry",
+
+      message: validatedData.message,
 
     });
 
     Logger.info(
 
-      "NEWSLETTER",
+      "PARTNERSHIP",
 
-      "NEW_SUBSCRIBER",
+      "NEW_PARTNERSHIP",
 
-      "Newsletter subscription received",
+      "New partnership enquiry received",
 
       lead
 
@@ -67,25 +86,26 @@ export async function POST(
 
       const zoho = await saveWebsiteLead({
 
-        name: "Newsletter Subscriber",
+        name: validatedData.name,
 
-        email: data.email,
+        email: validatedData.email,
 
-        phone: "",
+        phone: validatedData.phone,
 
-        company: "",
+        company: validatedData.company,
 
-        subject: "Newsletter Subscription",
+        subject:
+          validatedData.subject ||
+          "Partnership Enquiry",
 
-        message:
-          "User subscribed to the TRFSK Newsletter.",
+        message: validatedData.message,
 
-        source: "Newsletter",
+        source: "Partnership",
 
       });
 
       console.log("=================================");
-      console.log("ZOHO CRM");
+      console.log("ZOHO PARTNERSHIP");
       console.log(zoho);
       console.log("=================================");
 
@@ -95,9 +115,9 @@ export async function POST(
 
         "ZOHO",
 
-        "SAVE_FAILED",
+        "PARTNERSHIP_SAVE_FAILED",
 
-        "Unable to save Newsletter subscriber into Zoho CRM",
+        "Unable to save Partnership Lead into Zoho CRM",
 
         zohoError
 
@@ -107,85 +127,63 @@ export async function POST(
 
     /*
     ==========================================
-    Console Log
+    Console
     ==========================================
     */
 
     console.log("=================================");
-    console.log("NEW NEWSLETTER SUBSCRIBER");
+    console.log("NEW PARTNERSHIP ENQUIRY");
     console.log("Lead ID :", lead.leadId);
     console.log("Time :", lead.createdAt);
+    console.log("Name :", lead.name);
     console.log("Email :", lead.email);
     console.log("Status :", lead.status);
     console.log("=================================");
 
     /*
     ==========================================
-    Auto Reply
+    Emails
     ==========================================
     */
 
-    await sendAutoReply({
+    await sendContactEmail(validatedData);
 
-      name: "Subscriber",
-
-      email: data.email,
-
-      phone: "",
-
-      company: "",
-
-      subject: "Newsletter Subscription",
-
-      message:
-        "Thank you for subscribing to the TRFSK Newsletter.",
-
-    });
+    await sendAutoReply(validatedData);
 
     Logger.success(
 
-      "NEWSLETTER",
+      "PARTNERSHIP",
 
-      "SUBSCRIBED",
+      "EMAIL_SENT",
 
-      "Newsletter subscription completed",
+      "Partnership enquiry processed successfully",
 
       lead
 
     );
 
-    return NextResponse.json(
+    return NextResponse.json({
 
-      {
+      success: true,
 
-        success: true,
+      leadId: lead.leadId,
 
-        leadId: lead.leadId,
+      submittedAt: lead.createdAt,
 
-        submittedAt: lead.createdAt,
+      message:
+        "Thank you. Your partnership enquiry has been received successfully.",
 
-        message:
-          "Thank you for subscribing to our newsletter.",
-
-      },
-
-      {
-
-        status: 200,
-
-      }
-
-    );
+    });
 
   } catch (error) {
 
     Logger.error(
 
-      "NEWSLETTER",
+      "PARTNERSHIP",
 
       "API_ERROR",
 
-      "Newsletter subscription failed",
+      "Failed to process partnership enquiry",
 
       error
 
@@ -219,7 +217,8 @@ export async function POST(
 
         success: false,
 
-        message: "Unable to subscribe.",
+        message:
+          "Unable to process your request.",
 
       },
 

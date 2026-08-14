@@ -1,83 +1,190 @@
 import nodemailer from "nodemailer";
+import { adminTemplate } from "./emailTemplates";
+import { ContactEmailData } from "./emailTypes";
 
 export const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: process.env.SMTP_SECURE === "true",
+
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
 });
 
-// Verify connection (optional but useful for debugging)
-export const verifyEmailConnection = async () => {
+export async function verifyEmailConnection() {
   try {
     await transporter.verify();
-    console.log("✅ Gmail SMTP is ready");
+    console.log("✅ Zoho SMTP Connected");
   } catch (error) {
-    console.error("❌ Gmail SMTP error:", error);
+    console.error("SMTP Error:", error);
   }
-};
+}
 
-// Send email to TRFSK admin (you)
-export const sendContactEmail = async (data: {
-  name: string;
-  email: string;
-  phone?: string;
-  message: string;
-}) => {
-  return await transporter.sendMail({
-    from: `"TRFSK Website" <${process.env.EMAIL_USER}>`,
-    to: process.env.CONTACT_RECEIVER,
-    subject: `📩 New Contact Inquiry from ${data.name}`,
-    html: `
-      <div style="font-family: Arial; padding: 20px;">
-        <h2 style="color:#2563eb;">New Contact Inquiry</h2>
+/* ===========================================================
+   CONTACT FORM EMAIL TO COMPANY
+=========================================================== */
 
-        <p><strong>Name:</strong> ${data.name}</p>
-        <p><strong>Email:</strong> ${data.email}</p>
-        <p><strong>Phone:</strong> ${data.phone || "Not provided"}</p>
+export async function sendContactEmail(data: ContactEmailData) {
+  return transporter.sendMail({
+    from: `"TRFSK Website" <${process.env.SMTP_USER}>`,
 
-        <h3>Message:</h3>
-        <p>${data.message}</p>
+    to: process.env.CARE_EMAIL,
 
-        <hr />
-        <p style="color:gray;font-size:12px;">
-          This email was sent from TRFSK website contact form.
-        </p>
-      </div>
-    `,
+    replyTo: data.email,
+
+    subject:
+      data.subject ||
+      `New Website Enquiry - ${data.name}`,
+
+    html: adminTemplate(data),
   });
-};
+}
 
-// Auto-reply email to visitor
-export const sendAutoReply = async (data: {
-  name: string;
-  email: string;
-}) => {
-  return await transporter.sendMail({
-    from: `"TRFSK Team" <${process.env.EMAIL_USER}>`,
+/* ===========================================================
+   AUTO REPLY TO CONTACT FORM USER
+=========================================================== */
+
+export async function sendAutoReply(data: ContactEmailData) {
+  return transporter.sendMail({
+    from: `"TRFSK OMKAR SERVICES PVT LTD" <${process.env.SMTP_USER}>`,
+
     to: data.email,
-    subject: "✅ We received your message - TRFSK",
+
+    subject:
+      "Thank you for contacting TRFSK OMKAR SERVICES PVT LTD",
+
     html: `
-      <div style="font-family: Arial; padding: 20px;">
-        <h2 style="color:#2563eb;">Thank you, ${data.name}!</h2>
+<!DOCTYPE html>
 
-        <p>
-          We have received your inquiry. Our team will review it
-          and get back to you shortly.
-        </p>
+<html>
 
-        <p>
-          At TRFSK, we focus on financial awareness, business education,
-          and meaningful collaboration.
-        </p>
+<body style="font-family:Arial;background:#f8fafc;padding:40px;">
 
-        <br />
+<div style="max-width:700px;margin:auto;background:white;border-radius:12px;padding:40px;border:1px solid #ddd;">
 
-        <p style="color:gray;font-size:12px;">
-          This is an automated response. Please do not reply to this email.
-        </p>
-      </div>
-    `,
+<h2 style="color:#2563eb;">
+Thank you, ${data.name}
+</h2>
+
+<p>
+We have successfully received your enquiry.
+</p>
+
+<p>
+One of our team members will review your request and contact you shortly.
+</p>
+
+<hr>
+
+<p><strong>Reference</strong></p>
+
+<p>Name : ${data.name}</p>
+
+<p>Email : ${data.email}</p>
+
+<p>Subject : ${data.subject || "General Enquiry"}</p>
+
+<p>
+Thank you for choosing
+<strong>TRFSK OMKAR SERVICES PVT LTD</strong>.
+</p>
+
+</div>
+
+</body>
+
+</html>
+`,
   });
-};
+}
+
+/* ===========================================================
+   NEWSLETTER WELCOME EMAIL
+=========================================================== */
+
+export async function sendNewsletterWelcome(email: string) {
+  await transporter.sendMail({
+    from: `"TRFSK Newsletter" <${process.env.SMTP_USER}>`,
+
+    to: email,
+
+    subject:
+      "Welcome to TRFSK OMKAR SERVICES PVT LTD",
+
+    html: `
+<!DOCTYPE html>
+
+<html>
+
+<body style="font-family:Arial;background:#f8fafc;padding:40px;">
+
+<div style="max-width:700px;margin:auto;background:white;border-radius:12px;padding:40px;border:1px solid #ddd;">
+
+<h2 style="color:#2563eb;">
+Welcome to TRFSK
+</h2>
+
+<p>
+Thank you for subscribing to our newsletter.
+</p>
+
+<p>
+You will now receive:
+</p>
+
+<ul>
+
+<li>Business Updates</li>
+
+<li>Financial Awareness Articles</li>
+
+<li>Educational Resources</li>
+
+<li>New Partnership Opportunities</li>
+
+<li>Important Company Announcements</li>
+
+</ul>
+
+<br>
+
+<p>
+We appreciate your interest.
+</p>
+
+<p>
+
+<strong>
+TRFSK OMKAR SERVICES PVT LTD
+</strong>
+
+</p>
+
+</div>
+
+</body>
+
+</html>
+`,
+  });
+
+  await transporter.sendMail({
+    from: `"TRFSK Website" <${process.env.SMTP_USER}>`,
+
+    to: process.env.SUBSCRIBER_EMAIL,
+
+    subject: "New Newsletter Subscriber",
+
+    html: `
+<h2>New Newsletter Subscriber</h2>
+
+<p><strong>Email :</strong> ${email}</p>
+
+<p>
+This subscriber joined through the website newsletter form.
+</p>
+`,
+  });
+}
