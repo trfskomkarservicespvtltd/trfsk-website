@@ -16,11 +16,13 @@ export type LogModule =
   | "CONTACT"
   | "NEWSLETTER"
   | "PARTNER"
+  | "PARTNERSHIP"
   | "KYC"
   | "DOCUMENT"
   | "AGREEMENT"
   | "PAYMENT"
   | "EMAIL"
+  | "ZOHO"
   | "LOGIN"
   | "ADMIN";
 

@@ -140,7 +140,7 @@ export default function BlogSearchFilter() {
           {filteredPosts.map((post) => (
             <article
               key={post.id}
-              className="bg-slate-900 rounded-lg overflow-hidden hover:shadow-xl transition duration-300 flex flex-col"
+              className="flex flex-col overflow-hidden rounded-3xl border border-slate-800 bg-slate-900/70 backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/10"
             >
               {/* Image placeholder */}
               <div className="h-48 bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
