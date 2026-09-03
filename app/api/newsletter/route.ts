@@ -29,7 +29,7 @@ export async function POST(
 
   const origin = request.headers.get("origin");
   const host = request.headers.get("host");
-  if (origin && !origin.includes(host ?? "")) {
+  if (origin && host && !origin.includes(host)) {
     Logger.warning("NEWSLETTER", "CSRF_BLOCKED", `Blocked cross-origin request`, { origin, ip });
     return NextResponse.json(
       { success: false, message: "Invalid request origin." },
