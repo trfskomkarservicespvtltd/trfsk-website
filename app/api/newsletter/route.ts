@@ -10,7 +10,8 @@ import { isRateLimited, getRateLimitRetryAfter } from "@/app/lib/ratelimit";
 import { sendAutoReply } from "@/app/lib/mail";
 
 const NewsletterSchema = z.object({
-  email: z.email("Invalid email address"),
+  email: z.email("Invalid email address").max(254),
+  website: z.string().max(0).optional(),
 });
 
 export async function POST(
@@ -42,6 +43,11 @@ export async function POST(
     const body = await request.json();
 
     const data = NewsletterSchema.parse(body);
+
+    if (data.website && data.website.length > 0) {
+      Logger.warning("NEWSLETTER", "HONEYPOT_TRIGGERED", "Bot detected via honeypot", { ip });
+      return NextResponse.json({ success: true, message: "Subscribed." });
+    }
 
     const lead = createLead({
 

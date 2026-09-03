@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Mail, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { HoneypotField } from '@/app/components/forms/HoneypotField';
 
 export default function NewsletterSignup() {
 
@@ -96,6 +97,7 @@ export default function NewsletterSignup() {
         onSubmit={handleSubmit}
         className="flex flex-col sm:flex-row gap-3"
       >
+        <HoneypotField />
 
         <input
 

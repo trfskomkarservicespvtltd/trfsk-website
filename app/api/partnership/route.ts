@@ -6,6 +6,7 @@ import { Database } from "@/app/lib/database";
 import { createLead } from "@/app/lib/lead";
 import { saveWebsiteLead } from "@/app/lib/zoho";
 import { isRateLimited, getRateLimitRetryAfter } from "@/app/lib/ratelimit";
+import { sanitizeText, isSafeText } from "@/app/lib/sanitize";
 
 import {
   sendAutoReply,
@@ -13,17 +14,18 @@ import {
 } from "@/app/lib/mail";
 
 const PartnershipSchema = z.object({
-  name: z.string().min(2, "Name is required"),
-  email: z.email("Invalid email"),
-  phone: z.string().optional(),
-  company: z.string().optional(),
-  subject: z.string().optional(),
+  name: z.string().min(2, "Name is required").max(200),
+  email: z.email("Invalid email").max(254),
+  phone: z.string().max(50).optional(),
+  company: z.string().max(200).optional(),
+  subject: z.string().max(300).optional(),
   type: z.enum([
     "general",
     "partnership",
     "support",
   ]).optional(),
-  message: z.string().min(10),
+  message: z.string().min(10).max(5000),
+  website: z.string().max(0).optional(),
 });
 
 export async function POST(
@@ -57,23 +59,45 @@ export async function POST(
     const validatedData =
       PartnershipSchema.parse(body);
 
+    if (validatedData.website && validatedData.website.length > 0) {
+      Logger.warning("PARTNERSHIP", "HONEYPOT_TRIGGERED", "Bot detected via honeypot", { ip });
+      return NextResponse.json({ success: true, message: "Submitted." });
+    }
+
+    const safeMessage = isSafeText(validatedData.message) ? sanitizeText(validatedData.message) : "";
+    if (!safeMessage || safeMessage.length < 10) {
+      Logger.warning("PARTNERSHIP", "UNSAFE_INPUT", "Rejected unsafe input", { ip });
+      return NextResponse.json(
+        { success: false, message: "Invalid input content." },
+        { status: 400 }
+      );
+    }
+
+    const sanitizedData = {
+      ...validatedData,
+      name: sanitizeText(validatedData.name),
+      company: validatedData.company ? sanitizeText(validatedData.company) : undefined,
+      subject: validatedData.subject ? sanitizeText(validatedData.subject) : undefined,
+      message: safeMessage,
+    };
+
     const lead = createLead({
 
       source: "PARTNERSHIP",
 
-      name: validatedData.name,
+      name: sanitizedData.name,
 
       email: validatedData.email,
 
       phone: validatedData.phone,
 
-      company: validatedData.company,
+      company: sanitizedData.company,
 
       subject:
-        validatedData.subject ||
+        sanitizedData.subject ||
         "Partnership Enquiry",
 
-      message: validatedData.message,
+      message: sanitizedData.message,
 
     });
 
@@ -107,19 +131,19 @@ export async function POST(
 
       const zoho = await saveWebsiteLead({
 
-        name: validatedData.name,
+        name: sanitizedData.name,
 
         email: validatedData.email,
 
         phone: validatedData.phone,
 
-        company: validatedData.company,
+        company: sanitizedData.company,
 
         subject:
-          validatedData.subject ||
+          sanitizedData.subject ||
           "Partnership Enquiry",
 
-        message: validatedData.message,
+        message: sanitizedData.message,
 
         source: "Partnership",
 
@@ -167,9 +191,9 @@ export async function POST(
     ==========================================
     */
 
-    await sendContactEmail(validatedData);
+    await sendContactEmail(sanitizedData);
 
-    await sendAutoReply(validatedData);
+    await sendAutoReply(sanitizedData);
 
     Logger.success(
 

@@ -30,8 +30,29 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files - NEVER commit these
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env*.local
+.env.development.local
+.env.production.local
+.env.test.local
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 
 # vercel
 .vercel
@@ -39,3 +60,29 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Logs
+logs
+*.log
+
+# Backup / dump files
+*.bak
+*.tmp
+*.orig
+
+# Prisma
+/prisma/migrations/dev/
+
+# Local test artifacts
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
+# Secrets - belt and suspenders
+**/secrets.json
+**/secrets.yml
+**/service-account*.json
+**/gcp-key.json
+**/firebase-adminsdk*.json
+**/*.pfx
+**/*.p12

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import { HoneypotField } from '@/app/components/forms/HoneypotField';
 
 interface PartnershipFormData {
   name: string;
@@ -116,6 +117,7 @@ export default function PartnershipForm() {
         onSubmit={handleSubmit}
         className="space-y-6"
       >
+        <HoneypotField />
 
         {notification.message && (
 

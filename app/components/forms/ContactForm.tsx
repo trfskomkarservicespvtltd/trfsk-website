@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import { HoneypotField } from '@/app/components/forms/HoneypotField';
 
 interface FormData {
   name: string;
@@ -117,6 +118,7 @@ export default function EnhancedContactForm() {
       onSubmit={handleSubmit}
       className="space-y-6"
     >
+      <HoneypotField />
       {notification.type && (
         <div
           className={`p-4 rounded-lg flex items-center gap-3 ${
