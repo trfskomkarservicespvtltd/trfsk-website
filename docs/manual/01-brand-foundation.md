@@ -7,6 +7,8 @@
 **Document status:** Living reference — update via pull request, not ad hoc chat
 **Applies to repo:** `trfsk-website` (Next.js App Router, `app/` directory)
 
+> **Current Implementation Status (August 2026):** This repository currently implements the **public-facing marketing website** — Home, About, Services, Blog, Contact, Partnerships, Team, Knowledge Center, Get Started, and legal pages. Lead capture forms are integrated with Zoho CRM and Zoho SMTP. The Partner Portal, DAMS, Admin Dashboard, AI Platform, and Automation layer described in this manual are **planned modules, not yet built**.
+
 ---
 
 ### 1.0 Purpose of This Manual

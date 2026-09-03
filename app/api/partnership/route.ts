@@ -5,6 +5,7 @@ import { Logger } from "@/app/lib/logger";
 import { Database } from "@/app/lib/database";
 import { createLead } from "@/app/lib/lead";
 import { saveWebsiteLead } from "@/app/lib/zoho";
+import { isRateLimited, getRateLimitRetryAfter } from "@/app/lib/ratelimit";
 
 import {
   sendAutoReply,
@@ -28,6 +29,26 @@ const PartnershipSchema = z.object({
 export async function POST(
   request: NextRequest
 ) {
+  const ip = request.headers.get("x-forwarded-for") ?? "unknown";
+
+  if (isRateLimited(ip)) {
+    const retryAfter = getRateLimitRetryAfter(ip);
+    Logger.warning("PARTNERSHIP", "RATE_LIMITED", `Rate limited IP: ${ip}`, { ip });
+    return NextResponse.json(
+      { success: false, message: "Too many requests. Please try again later." },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } }
+    );
+  }
+
+  const origin = request.headers.get("origin");
+  const host = request.headers.get("host");
+  if (origin && !origin.includes(host ?? "")) {
+    Logger.warning("PARTNERSHIP", "CSRF_BLOCKED", `Blocked cross-origin request`, { origin, ip });
+    return NextResponse.json(
+      { success: false, message: "Invalid request origin." },
+      { status: 403 }
+    );
+  }
 
   try {
 
