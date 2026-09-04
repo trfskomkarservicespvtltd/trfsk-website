@@ -186,9 +186,31 @@ export async function POST(
     ==========================================
     */
 
-    await sendContactEmail(sanitizedData);
+    try {
+      await sendContactEmail(sanitizedData);
+      Logger.info("CONTACT", "ADMIN_EMAIL_SENT", "Admin notification sent successfully", lead);
+    } catch (emailError) {
+      Logger.error(
+        "CONTACT",
+        "ADMIN_EMAIL_FAILED",
+        "Failed to send admin email notification",
+        emailError
+      );
+      throw new Error(`Admin email failed: ${emailError instanceof Error ? emailError.message : String(emailError)}`);
+    }
 
-    await sendAutoReply(sanitizedData);
+    try {
+      await sendAutoReply(sanitizedData);
+      Logger.info("CONTACT", "USER_EMAIL_SENT", "Auto-reply sent to user successfully", lead);
+    } catch (emailError) {
+      Logger.error(
+        "CONTACT",
+        "USER_EMAIL_FAILED",
+        "Failed to send auto-reply email to user",
+        emailError
+      );
+      throw new Error(`User email failed: ${emailError instanceof Error ? emailError.message : String(emailError)}`);
+    }
 
     Logger.success(
 
@@ -217,13 +239,15 @@ export async function POST(
 
   } catch (error) {
 
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    
     Logger.error(
 
       "CONTACT",
 
       "API_ERROR",
 
-      "Failed to process contact enquiry",
+      `Failed to process contact enquiry: ${errorMsg}`,
 
       error
 
@@ -236,6 +260,8 @@ export async function POST(
         {
 
           success: false,
+
+          message: "Validation failed",
 
           errors: error.issues,
 
@@ -258,7 +284,7 @@ export async function POST(
         success: false,
 
         message:
-          "Unable to process your request.",
+          "Unable to process your request. Please contact us directly at care@trfskomkar.com",
 
       },
 
