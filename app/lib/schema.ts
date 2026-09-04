@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { siteConfig, absoluteUrl } from '@/app/lib/siteConfig';
 
 export const generateMetadata = (): Metadata => {
   return {
@@ -16,7 +17,7 @@ export const generateMetadata = (): Metadata => {
     openGraph: {
       title: 'TRFSK - Financial Awareness & Business Education',
       description: 'TRFSK is committed to promoting financial awareness, entrepreneurship, business education and meaningful professional networking.',
-      url: 'https://trfskomkar.com',
+      url: siteConfig.url,
       siteName: 'TRFSK',
       locale: 'en_US',
       type: 'website',
@@ -45,8 +46,8 @@ export const getOrganizationSchema = () => {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'TRFSK',
-    url: 'https://trfskomkar.com',
-    logo: 'https://trfskomkar.com/logo.png',
+    url: siteConfig.url,
+    logo: absoluteUrl('/logo.png'),
     description:
       'Financial awareness, entrepreneurship, business education, and professional networking.',
     sameAs: [
@@ -80,7 +81,7 @@ export const getLocalBusinessSchema = () => {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     name: 'TRFSK',
-    image: 'https://trfskomkar.com/logo.png',
+    image: absoluteUrl('/logo.png'),
     description:
       'Leading provider of financial education, entrepreneurship training, and business guidance.',
     address: {
@@ -93,7 +94,7 @@ export const getLocalBusinessSchema = () => {
     },
     telephone: '+91-81693-02861',
     email: "care@trfskomkar.com",
-    url: 'https://trfskomkar.com',
+    url: siteConfig.url,
   };
 };
 

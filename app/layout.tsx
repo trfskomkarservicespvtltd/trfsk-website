@@ -7,6 +7,7 @@ import Footer from "./components/layout/Footer";
 import JsonLd from "./components/JsonLd";
 import { GoogleAnalytics } from "./components/GoogleAnalytics";
 import { getOrganizationSchema, getServiceSchema } from "./lib/schema";
+import { siteConfig } from "./lib/siteConfig";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,7 +22,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://trfskomkar.com"),
+  metadataBase: new URL(siteConfig.url),
   title: "TRFSK - Financial Awareness & Business Education",
   description: "TRFSK is committed to promoting financial awareness, entrepreneurship, business education and meaningful professional networking.",
   keywords: "financial awareness, entrepreneurship, business education, professional networking, TRFSK, financial literacy, investment guidance",
@@ -36,7 +37,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "TRFSK - Financial Awareness & Business Education",
     description: "TRFSK is committed to promoting financial awareness, entrepreneurship, business education and meaningful professional networking.",
-    url: "https://trfskomkar.com",
+    url: siteConfig.url,
     siteName: "TRFSK",
     locale: "en_US",
     type: "website",
@@ -72,7 +73,7 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#0f172a" />
-        <link rel="canonical" href="https://trfskomkar.com" />
+        <link rel="canonical" href={siteConfig.url} />
         <JsonLd data={getOrganizationSchema()} />
         <JsonLd data={getServiceSchema()} />
         <GoogleAnalytics />

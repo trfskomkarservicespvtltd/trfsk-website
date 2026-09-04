@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { Mail } from 'lucide-react';
 import Reveal from '../components/ui/Reveal';
 import SectionTitle from '../components/ui/SectionTitle';
+import { siteConfig } from '@/app/lib/siteConfig';
 
 export const metadata: Metadata = {
   title: 'Our Team - Meet the TRFSK Leadership | TRFSK',
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Our Team - Meet the TRFSK Leadership | TRFSK',
     description: 'Meet the experienced team behind TRFSK driving financial awareness, entrepreneurship, and business education.',
-    url: 'https://trfskomkar.com/team',
+    url: `${siteConfig.url}/team`,
     type: 'website',
   },
 };

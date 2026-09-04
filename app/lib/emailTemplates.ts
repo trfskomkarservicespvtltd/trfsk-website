@@ -1,4 +1,5 @@
 import { ContactEmailData } from "./emailTypes";
+import { siteConfig } from "@/app/lib/siteConfig";
 
 export function adminTemplate(data: ContactEmailData) {
   return `
@@ -202,7 +203,7 @@ Generated automatically by
 <br><br>
 
 Website:
-https://www.trfskomkar.com
+${siteConfig.url}
 
 <br>
 

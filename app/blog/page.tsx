@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Reveal from '../components/ui/Reveal';
 import SectionTitle from '../components/ui/SectionTitle';
 import BlogSearchFilter from '../components/ui/BlogSearchFilter';
+import { siteConfig } from '@/app/lib/siteConfig';
 
 export const metadata: Metadata = {
   title: 'Blog - Financial & Business Insights | TRFSK',
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Blog - Financial & Business Insights | TRFSK',
     description: 'Read the latest articles on financial education, entrepreneurship, investment guidance, and business strategy.',
-    url: 'https://trfskomkar.com/blog',
+    url: `${siteConfig.url}/blog`,
     type: 'website',
   },
 };

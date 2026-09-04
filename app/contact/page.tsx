@@ -7,6 +7,7 @@ import {
 
 import Reveal from "../components/ui/Reveal";
 import ContactForm from "../components/forms/ContactForm";
+import { siteConfig } from "@/app/lib/siteConfig";
 
 export const metadata = {
   title: "Contact Us - Get in Touch with TRFSK | TRFSK",
@@ -17,7 +18,7 @@ export const metadata = {
     title: "Contact Us - Get in Touch with TRFSK | TRFSK",
     description:
       "Have questions or interested in partnerships? Contact TRFSK today.",
-    url: "https://trfskomkar.com/contact",
+    url: `${siteConfig.url}/contact`,
     type: "website",
   },
 };
