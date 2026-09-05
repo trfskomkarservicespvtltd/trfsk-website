@@ -20,6 +20,17 @@ cp .env.local.example .env.local
 - `NEXT_PUBLIC_WEBSITE`: Your website URL
 - `NEXT_PUBLIC_COMPANY_NAME`: Your company name
 
+**Supabase investor platform:**
+- `NEXT_PUBLIC_SUPABASE_URL`: Project URL from Supabase Project Settings → API
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Publishable/anon key from Supabase Project Settings → API
+
+Create a Supabase project, then run `supabase/migrations/202609050001_investor_platform.sql` in the SQL Editor. Enable email authentication in Authentication → Providers. After creating the first admin user through `/auth/login`, promote it once in the SQL Editor:
+```sql
+update public.profiles set role = 'admin' where id = (select id from auth.users where email = 'admin@example.com');
+```
+
+The admin portal at `/admin` links confirmed users to accounts and posts contribution, withdrawal, adjustment, and approved return entries. Investor balances are derived from those immutable entries and update through Supabase Realtime.
+
 **Zoho SMTP Configuration:**
 - `SMTP_HOST`: Zoho SMTP host (default: smtp.zoho.in)
 - `SMTP_PORT`: SMTP port (default: 465)
@@ -73,13 +84,17 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - `/disclaimer` - Disclaimer page
 - `/privacy-policy` - Privacy policy
 - `/terms-and-conditions` - Terms and conditions
+- `/auth/login` - Investor sign in and account creation
+- `/investor` - Protected investor dashboard
+- `/investor/transactions` - Protected transaction history
+- `/admin` - Protected admin control room
 
 ### API Routes
 - `POST /api/contact` - Contact form submission
 - `POST /api/partnership` - Partnership form submission
 - `POST /api/newsletter` - Newsletter signup
-- `GET /api/zoho/callback` - Zoho OAuth callback
-- `GET /api/test-crm` - Test CRM connection
+- `GET /api/zoho/callback` - Admin-only Zoho OAuth callback
+- `GET /api/test-crm` - Admin-only CRM connection test
 - `GET /sitemap.xml` - XML sitemap for SEO
 
 ## Features

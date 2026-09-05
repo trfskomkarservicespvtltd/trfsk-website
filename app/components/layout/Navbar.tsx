@@ -86,13 +86,10 @@ export default function Navbar() {
         {/* CTA */}
 
         <div className="hidden lg:block">
-
-          <Link
-            href="/get-started"
-            className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
-          >
-            Get Started
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/auth/login" className="px-3 py-3 text-sm font-semibold text-slate-300 transition hover:text-cyan-400">Investor login</Link>
+            <Link href="/get-started" className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700">Get Started</Link>
+          </div>
 
         </div>
 
@@ -133,6 +130,7 @@ export default function Navbar() {
             >
               Get Started
             </Link>
+            <Link href="/auth/login" onClick={() => setMobileOpen(false)} className="mt-2 block rounded-xl border border-slate-800 py-3 text-center font-semibold text-slate-200">Investor login</Link>
 
           </div>
 

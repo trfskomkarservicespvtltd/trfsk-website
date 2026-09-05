@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/app/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
+    await requireAdmin();
     const { searchParams } = new URL(request.url);
 
     const code = searchParams.get("code");
@@ -37,16 +39,15 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    const token = await response.json();
+    await response.json();
 
-    console.log("======================================");
-    console.log("ZOHO TOKEN RESPONSE");
-    console.log(token);
-    console.log("======================================");
+    if (!response.ok) {
+      return NextResponse.json({ success: false, message: "Zoho authorization failed." }, { status: 502 });
+    }
 
     return NextResponse.json({
       success: true,
-      token,
+      message: "Zoho authorization completed. Store the refresh token in server environment configuration.",
     });
 
   } catch (error) {
