@@ -38,6 +38,7 @@ const securityHeaders = [
 const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com;
+  connect-src 'self' https://*.supabase.co wss://*.supabase.co;
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: blob: https:;
   font-src 'self' data:;

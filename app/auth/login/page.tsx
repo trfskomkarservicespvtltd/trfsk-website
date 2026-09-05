@@ -2,7 +2,7 @@ import LoginForm from "./LoginForm";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Investor Login | TRFSK",
+  title: "Partner Login | TRFSK",
   robots: { index: false, follow: false },
 };
 
