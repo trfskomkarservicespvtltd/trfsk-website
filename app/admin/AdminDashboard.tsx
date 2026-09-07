@@ -53,7 +53,7 @@ export default function AdminDashboard() {
     setLoading(false);
   }
 
-  async function handleAction(id: string, type: "withdrawal" | "fund_addition", action: "approve" | "reject", rejectionReason?: string) {
+  async function handleAction(id: string, type: "withdrawal" | "fund_addition", action: "approve" | "reject" | "complete", rejectionReason?: string) {
     setProcessing(id);
     try {
       const res = await fetch("/api/admin/funds", {
