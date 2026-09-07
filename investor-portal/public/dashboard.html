@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Investment — Dashboard</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="mark">IN</div>
+    <div><h1 id="investorName">—</h1><div class="sub">Your Investment Overview</div></div>
+  </div>
+  <div style="display:flex;gap:10px;">
+    <button class="btn btn-gold btn-sm" id="downloadBtn">Download Agreement</button>
+    <button class="btn btn-ghost btn-sm" id="logoutBtn">Log Out</button>
+  </div>
+</header>
+<main class="wrap">
+  <div class="summary" id="summary"></div>
+
+  <div class="section-head"><h2>Status</h2><div class="rule"></div></div>
+  <div id="statusRow" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px;"></div>
+
+  <div class="section-head"><h2>Transaction History</h2><div class="rule"></div></div>
+  <table class="ledger">
+    <thead><tr><th>Month</th><th>Type</th><th>Amount</th><th>Txn No.</th><th>Due Date</th><th>Status</th><th>Note</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <div class="section-head"><h2>My KYC Details</h2><div class="rule"></div></div>
+  <div style="background:#fff;border:1px solid var(--line);border-radius:6px;padding:20px 22px;max-width:640px;">
+    <p style="font-size:12.5px;color:var(--text-mute);margin-top:0;">
+      Fill this in once so we have your details on file for our records. Submitting this does not automatically verify your KYC —
+      our team reviews it and updates your status manually.
+    </p>
+    <div class="field"><label>Full Address</label><input id="kAddress"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+      <div class="field"><label>City</label><input id="kCity"></div>
+      <div class="field"><label>State</label><input id="kState"></div>
+      <div class="field"><label>Pincode</label><input id="kPincode"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field"><label>PAN Number</label><input id="kPan"></div>
+      <div class="field"><label>Aadhaar Number</label><input id="kAadhaar"></div>
+    </div>
+    <div class="field"><label>Bank Name</label><input id="kBankName"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field"><label>Account Holder Name</label><input id="kBankAccName"></div>
+      <div class="field"><label>Account Number</label><input id="kBankAccNo"></div>
+    </div>
+    <div class="field"><label>IFSC Code</label><input id="kIfsc"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field"><label>Upload PAN Card (JPG/PNG/PDF)</label><input id="kPanFile" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf"></div>
+      <div class="field"><label>Upload Aadhaar Card (JPG/PNG/PDF)</label><input id="kAadhaarFile" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf"></div>
+    </div>
+    <button class="btn btn-gold" id="btnSaveKyc">Save My Details</button>
+    <span id="kycSavedNote" style="font-size:12px;color:var(--green);margin-left:10px;display:none;">Saved</span>
+  </div>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+const fmt = n => '₹' + Number(n||0).toLocaleString('en-IN', {maximumFractionDigits:0});
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+
+async function load(){
+  const meRes = await fetch('/api/partner/me', {credentials:'include'});
+  if(!meRes.ok){ window.location.href='/login.html'; return; }
+  const {partner, stats} = await meRes.json();
+  document.getElementById('investorName').textContent = partner.name;
+
+  document.getElementById('summary').innerHTML = `
+    <div class="stat" style="--accent:var(--ink)"><div class="lbl">Current Position</div><div class="val">${fmt(stats.position)}</div></div>
+    <div class="stat" style="--accent:var(--gold)"><div class="lbl">Upcoming Payout (est.)</div><div class="val">${fmt(stats.upcomingPayout)}</div></div>
+    <div class="stat" style="--accent:var(--green)"><div class="lbl">Total Profit Earned</div><div class="val">${fmt(stats.profit)}</div></div>
+    <div class="stat" style="--accent:var(--teal)"><div class="lbl">Total Capital Returned</div><div class="val">${fmt(stats.repaid)}</div></div>
+  `;
+
+  document.getElementById('statusRow').innerHTML = `
+    <div class="stamp ${partner.kyc?'done':'pending'}">${partner.kyc?'KYC Verified':'KYC Pending'}</div>
+    <div class="stamp done" style="border-color:var(--gold);color:var(--gold);background:#FCEFD9;">Rate: ${partner.rate}% ${partner.rate_type==='annual'?'p.a.':'per month'}</div>
+    <div class="stamp done" style="border-color:var(--teal);color:var(--teal);background:var(--teal-soft);">Next Due: ${stats.nextDueDate}</div>
+  `;
+
+  document.getElementById('kAddress').value = partner.address||'';
+  document.getElementById('kCity').value = partner.city||'';
+  document.getElementById('kState').value = partner.state||'';
+  document.getElementById('kPincode').value = partner.pincode||'';
+  document.getElementById('kPan').value = partner.pan||'';
+  document.getElementById('kAadhaar').value = partner.aadhaar||'';
+  document.getElementById('kBankName').value = partner.bank_name||'';
+  document.getElementById('kBankAccName').value = partner.bank_account_name||'';
+  document.getElementById('kBankAccNo').value = partner.bank_account_no||'';
+  document.getElementById('kIfsc').value = partner.ifsc||'';
+
+  const txnRes = await fetch('/api/partner/transactions', {credentials:'include'});
+  const {transactions} = await txnRes.json();
+  const tagMap = {profit:['profit','Profit'], repay:['repay','Repayment'], addcap:['addcap','Capital Added']};
+  const statusMap = {paid:'paid', pending:'pending', late:'late'};
+  document.getElementById('rows').innerHTML = transactions.length ? transactions.map(t=>{
+    const [cls,label] = tagMap[t.type] || ['profit', t.type];
+    const sCls = statusMap[t.status] || 'pending';
+    return `<tr>
+      <td>${t.month||'—'}</td>
+      <td><span class="tag ${cls}">${label}</span></td>
+      <td>${fmt(t.amount)}</td>
+      <td>${t.txn_number||'—'}</td>
+      <td>${t.due_date||'—'}</td>
+      <td><span class="tag ${sCls}">${t.status||'pending'}</span></td>
+      <td>${t.note||'—'}</td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="7" style="text-align:center;color:var(--text-mute);font-family:'Inter',sans-serif;">No transactions recorded yet</td></tr>`;
+}
+
+document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+  await fetch('/api/auth/partner/logout', {method:'POST', credentials:'include'});
+  window.location.href = '/login.html';
+});
+document.getElementById('downloadBtn').addEventListener('click', ()=>{
+  window.location.href = '/api/partner/agreement';
+});
+
+document.getElementById('btnSaveKyc').addEventListener('click', async ()=>{
+  const btn = document.getElementById('btnSaveKyc');
+  btn.disabled = true;
+  try{
+    const payload = {
+      address: document.getElementById('kAddress').value.trim(),
+      city: document.getElementById('kCity').value.trim(),
+      state: document.getElementById('kState').value.trim(),
+      pincode: document.getElementById('kPincode').value.trim(),
+      pan: document.getElementById('kPan').value.trim().toUpperCase(),
+      aadhaar: document.getElementById('kAadhaar').value.trim(),
+      bankName: document.getElementById('kBankName').value.trim(),
+      bankAccountName: document.getElementById('kBankAccName').value.trim(),
+      bankAccountNo: document.getElementById('kBankAccNo').value.trim(),
+      ifsc: document.getElementById('kIfsc').value.trim().toUpperCase(),
+    };
+    const r = await fetch('/api/partner/kyc', {
+      method:'PATCH', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
+    });
+    if(!r.ok) throw new Error((await r.json()).error || 'Could not save');
+
+    const panFile = document.getElementById('kPanFile').files[0];
+    const aadhaarFile = document.getElementById('kAadhaarFile').files[0];
+    if(panFile) await uploadDoc(panFile, 'pan');
+    if(aadhaarFile) await uploadDoc(aadhaarFile, 'aadhaar');
+
+    const note = document.getElementById('kycSavedNote');
+    note.style.display = 'inline';
+    setTimeout(()=>note.style.display='none', 3000);
+    toast('KYC details saved — our team will review and update your status');
+  }catch(e){ toast(e.message); }
+  finally{ btn.disabled = false; }
+});
+
+async function uploadDoc(file, docType){
+  const fd = new FormData();
+  fd.append('document', file);
+  fd.append('docType', docType);
+  const r = await fetch('/api/partner/kyc/documents', { method:'POST', credentials:'include', body: fd });
+  if(!r.ok) throw new Error((await r.json()).error || 'Document upload failed');
+}
+
+load().catch(()=>toast('Could not load your data'));
+</script>
+</body>
+</html>

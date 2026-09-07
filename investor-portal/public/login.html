@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partner Login</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="auth-shell">
+  <div class="auth-card">
+    <h1>Partner Login</h1>
+    <div class="sub">Sign in to view your position, payouts, and repayment history</div>
+    <div class="err" id="err"></div>
+    <div class="field"><label>Registered Phone Number</label><input id="phone" type="tel" placeholder="10-digit mobile"></div>
+    <div class="field"><label>Password</label><input id="password" type="password" placeholder="Password given to you by admin"></div>
+    <button class="btn btn-gold full" id="loginBtn">Log In</button>
+  </div>
+</div>
+<script>
+document.getElementById('loginBtn').addEventListener('click', async ()=>{
+  const phone = document.getElementById('phone').value.trim();
+  const password = document.getElementById('password').value;
+  const errEl = document.getElementById('err');
+  errEl.classList.remove('show');
+  if(!phone || !password){ errEl.textContent='Enter your phone number and password'; errEl.classList.add('show'); return; }
+  try{
+    const r = await fetch('/api/auth/partner/login', {
+      method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+      body: JSON.stringify({phone, password})
+    });
+    const data = await r.json();
+    if(!r.ok){ errEl.textContent = data.error || 'Login failed'; errEl.classList.add('show'); return; }
+    window.location.href = '/dashboard.html';
+  }catch(e){ errEl.textContent='Could not reach the server'; errEl.classList.add('show'); }
+});
+document.getElementById('password').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('loginBtn').click(); });
+</script>
+</body>
+</html>

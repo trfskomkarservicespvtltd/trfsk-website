@@ -19,6 +19,7 @@ cp .env.local.example .env.local
 **Website:**
 - `NEXT_PUBLIC_WEBSITE`: Your website URL
 - `NEXT_PUBLIC_COMPANY_NAME`: Your company name
+- `ADMIN_PORTAL_EMAIL`: Authenticated email allowed to open the admin portal
 
 **Supabase investor platform:**
 - `NEXT_PUBLIC_SUPABASE_URL`: Project URL from Supabase Project Settings → API

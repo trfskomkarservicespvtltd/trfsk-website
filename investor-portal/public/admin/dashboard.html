@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Investor Ledger</title>
+<link rel="stylesheet" href="/styles.css">
+<style>
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:20px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:18px 20px;}
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .card-top h3{margin:0 0 3px;font-size:17px;font-family:'Fraunces',serif;font-weight:600;}
+  .metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+  .metric{background:var(--paper);border-radius:4px;padding:9px 11px;}
+  .metric .m-lbl{font-size:10px;color:var(--text-mute);text-transform:uppercase;}
+  .metric .m-val{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;margin-top:2px;}
+  .card-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+  .overlay{position:fixed;inset:0;background:rgba(27,36,48,.55);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;z-index:50;}
+  .overlay.open{display:flex;}
+  .modal{background:var(--paper);border-radius:6px;max-width:560px;width:100%;border:1px solid var(--line);}
+  .modal.wide{max-width:720px;}
+  .modal-head{padding:18px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+  .modal-head h3{margin:0;font-family:'Fraunces',serif;font-size:18px;}
+  .modal-close{cursor:pointer;background:none;border:none;font-size:20px;color:var(--text-mute);}
+  .modal-body{padding:20px 24px;max-height:70vh;overflow-y:auto;}
+  .modal-foot{padding:16px 24px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .kyc-toggle{display:flex;align-items:center;gap:10px;}
+  .kyc-toggle input{width:auto;}
+  .temp-pass{background:var(--green-soft);border:1px solid var(--green);border-radius:4px;padding:12px 14px;margin-bottom:14px;font-size:13px;}
+  .temp-pass b{font-family:'IBM Plex Mono',monospace;font-size:15px;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="mark">A</div>
+    <div><h1>Investor Ledger — Admin</h1><div class="sub">Manage investors &amp; transactions</div></div>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <a class="btn btn-ghost btn-sm" href="/api/admin/export/investors.csv">Export Investors</a>
+    <a class="btn btn-ghost btn-sm" href="/api/admin/export/transactions.csv">Export Transactions</a>
+    <button class="btn btn-ghost btn-sm" id="btnAddTxn">+ Record Transaction</button>
+    <button class="btn btn-gold btn-sm" id="btnAddInvestor">+ New Investor</button>
+    <button class="btn btn-ghost btn-sm" id="logoutBtn">Log Out</button>
+  </div>
+</header>
+<main class="wrap">
+  <div class="summary" id="summary"></div>
+  <div class="section-head"><h2>Investors</h2><div class="rule"></div></div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<!-- Add/Edit Investor Modal -->
+<div class="overlay" id="ovInvestor">
+  <div class="modal">
+    <div class="modal-head"><h3 id="invTitle">New Investor</h3><button class="modal-close" data-close="ovInvestor">&times;</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="invId">
+      <div class="field"><label>Investor Name</label><input id="invName"></div>
+      <div class="row2">
+        <div class="field"><label>Phone (used for login)</label><input id="invPhone"></div>
+        <div class="field"><label>Alternative Number</label><input id="invAlt"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Capital Deployed (₹)</label><input id="invCapital" type="number"></div>
+        <div class="field"><label>Start Date</label><input id="invStart" type="date"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Rate (%)</label><input id="invRate" type="number" step="0.01"></div>
+        <div class="field"><label>Rate Type</label><select id="invRateType"><option value="monthly">Per Month</option><option value="annual">Per Annum</option></select></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Payment Due Day (of month)</label><input id="invDueDay" type="number" min="1" max="28" value="10"></div>
+        <div class="field"><label>KYC Status</label>
+          <div class="kyc-toggle" style="margin-top:10px;"><input type="checkbox" id="invKyc"><label for="invKyc">KYC completed</label></div>
+        </div>
+      </div>
+      <div class="field"><label>Agreement Notes</label><textarea id="invNotes"></textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-line" data-close="ovInvestor">Cancel</button><button class="btn btn-gold" id="btnSaveInvestor">Save Investor</button></div>
+  </div>
+</div>
+
+<!-- Add Transaction Modal -->
+<div class="overlay" id="ovTxn">
+  <div class="modal">
+    <div class="modal-head"><h3 id="txnTitle">Record Transaction</h3><button class="modal-close" data-close="ovTxn">&times;</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="txnId">
+      <div class="field"><label>Investor</label><select id="txnInvestor"></select></div>
+      <div class="row2">
+        <div class="field"><label>Type</label><select id="txnType">
+          <option value="profit">Interest / Profit Payout</option>
+          <option value="repay">Capital Repayment</option>
+          <option value="addcap">Additional Capital Added</option>
+        </select></div>
+        <div class="field"><label>Month</label><input id="txnMonth" type="month"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Amount (₹)</label><input id="txnAmount" type="number"></div>
+        <div class="field"><label>Transaction Number</label><input id="txnNumber"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Due Date</label><input id="txnDue" type="date"></div>
+        <div class="field"><label>Status</label><select id="txnStatus"><option value="paid">Paid</option><option value="pending">Pending</option><option value="late">Late</option></select></div>
+      </div>
+      <div class="field"><label>Note</label><input id="txnNote"></div>
+      <div class="kyc-toggle"><input type="checkbox" id="txnNotify" checked><label for="txnNotify">Notify investor via WhatsApp when saved</label></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-line" data-close="ovTxn">Cancel</button><button class="btn btn-gold" id="btnSaveTxn">Save Transaction</button></div>
+  </div>
+</div>
+
+<!-- Investor Created - Password Modal -->
+<div class="overlay" id="ovPass">
+  <div class="modal">
+    <div class="modal-head"><h3>Partner Login Created</h3><button class="modal-close" data-close="ovPass">&times;</button></div>
+    <div class="modal-body">
+      <p style="margin-top:0;">Share these login details with the partner securely:</p>
+      <div class="temp-pass" style="margin-bottom:16px;">
+        <div style="margin-bottom:8px;"><b>Name:</b> <span id="passPartnerName"></span></div>
+        <div style="margin-bottom:8px;"><b>Phone (Login ID):</b> <span id="passPartnerPhone"></span></div>
+        <div><b>Temporary Password:</b> <b id="passPartnerTemp"></b></div>
+      </div>
+      <p style="font-size:13px;color:var(--text-mute);margin-bottom:16px;">This password is only shown once. The partner should change it after first login.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-gold" id="btnSendWhatsApp">Send via WhatsApp</button>
+        <button class="btn btn-gold" id="btnCopyCreds">Copy Credentials</button>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-line" data-close="ovPass">Done</button></div>
+  </div>
+</div>
+
+<!-- Detail / Ledger Modal -->
+<div class="overlay" id="ovDetail">
+  <div class="modal wide">
+    <div class="modal-head"><h3 id="detailName">Investor</h3><button class="modal-close" data-close="ovDetail">&times;</button></div>
+    <div class="modal-body">
+      <div id="tempPassBox"></div>
+      <div class="metrics" id="detailMetrics" style="grid-template-columns:repeat(4,1fr);"></div>
+
+      <div class="section-head" style="margin:20px 0 10px;"><h2>KYC Details Submitted by Investor</h2><div class="rule"></div></div>
+      <div id="kycBox" style="font-size:13px;line-height:1.8;"></div>
+
+      <div class="section-head" style="margin:20px 0 10px;"><h2>Transaction History</h2><div class="rule"></div></div>
+      <table class="ledger">
+        <thead><tr><th>Month</th><th>Type</th><th>Amount</th><th>Txn No.</th><th>Due</th><th>Status</th><th></th></tr></thead>
+        <tbody id="detailRows"></tbody>
+      </table>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-line" id="btnResetPass">Reset Portal Password</button>
+      <button class="btn btn-line" id="btnEditFromDetail">Edit</button>
+      <button class="btn btn-gold" id="btnDownloadAgreement">Download Agreement</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+const fmt = n => '₹' + Number(n||0).toLocaleString('en-IN', {maximumFractionDigits:0});
+let investors = [];
+let currentDetailId = null;
+let currentDetailTxns = {};
+let pendingNewPartner = {};
+
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2400); }
+function esc(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click', ()=>closeModal(b.dataset.close)));
+document.querySelectorAll('.overlay').forEach(ov=>ov.addEventListener('click', e=>{ if(e.target===ov) closeModal(ov.id); }));
+
+async function api(path, opts={}){
+  const r = await fetch(path, {credentials:'include', headers:{'Content-Type':'application/json'}, ...opts});
+  if(r.status === 401){ window.location.href='/admin/login.html'; throw new Error('unauthorized'); }
+  const data = await r.json();
+  if(!r.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+async function loadInvestors(){
+  const {investors: list} = await api('/api/admin/investors');
+  investors = list;
+  renderSummary();
+  renderGrid();
+}
+
+function renderSummary(){
+  let cap=0, profit=0, repaid=0;
+  investors.forEach(i=>{ cap+=i.stats.position; profit+=i.stats.profit; repaid+=i.stats.repaid; });
+  document.getElementById('summary').innerHTML = `
+    <div class="stat" style="--accent:var(--ink)"><div class="lbl">Capital Deployed</div><div class="val">${fmt(cap)}</div></div>
+    <div class="stat" style="--accent:var(--green)"><div class="lbl">Total Profit Paid</div><div class="val">${fmt(profit)}</div></div>
+    <div class="stat" style="--accent:var(--teal)"><div class="lbl">Total Capital Returned</div><div class="val">${fmt(repaid)}</div></div>
+    <div class="stat" style="--accent:var(--gold)"><div class="lbl">Active Investors</div><div class="val">${investors.length}</div></div>
+  `;
+}
+
+function renderGrid(){
+  const grid = document.getElementById('grid');
+  if(!investors.length){ grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--text-mute);">No investors yet. Add your first one.</div>`; return; }
+  grid.innerHTML = investors.map(inv=>`
+    <div class="card">
+      <div class="card-top">
+        <div><h3>${esc(inv.name)}</h3><div style="font-size:11px;color:var(--text-mute);">${inv.id.slice(0,10)}</div></div>
+        <div class="stamp ${inv.kyc?'done':'pending'}">${inv.kyc?'KYC Verified':'KYC Pending'}</div>
+      </div>
+      <div style="font-size:12.5px;color:var(--text-mute);margin-top:8px;">Rate: <b class="mono">${inv.rate}% ${inv.rate_type==='annual'?'p.a.':'per month'}</b></div>
+      <div class="metrics">
+        <div class="metric"><div class="m-lbl">Position</div><div class="m-val">${fmt(inv.stats.position)}</div></div>
+        <div class="metric"><div class="m-lbl">Next Due</div><div class="m-val" style="color:var(--gold);">${inv.stats.nextDueDate}</div></div>
+        <div class="metric"><div class="m-lbl">Profit Earned</div><div class="m-val" style="color:var(--green);">${fmt(inv.stats.profit)}</div></div>
+        <div class="metric"><div class="m-lbl">Capital Returned</div><div class="m-val" style="color:var(--teal);">${fmt(inv.stats.repaid)}</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--text-mute);margin-top:10px;">📞 ${inv.phone||'—'} &nbsp; ☎ Alt: ${inv.alt_phone||'—'}</div>
+      <div class="card-actions">
+        <button class="btn btn-line btn-sm" onclick="openDetail('${inv.id}')">View Ledger</button>
+        <button class="btn btn-line btn-sm" onclick="openEdit('${inv.id}')">Edit</button>
+        <button class="btn btn-gold btn-sm" onclick="downloadAgreement('${inv.id}')">Agreement</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ---- Add/Edit Investor ----
+document.getElementById('btnAddInvestor').addEventListener('click', ()=>{
+  document.getElementById('invTitle').textContent = 'New Investor';
+  ['invId','invName','invPhone','invAlt','invCapital','invStart','invRate','invNotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('invRateType').value='monthly';
+  document.getElementById('invDueDay').value=10;
+  document.getElementById('invKyc').checked=false;
+  openModal('ovInvestor');
+});
+
+window.openEdit = function(id){
+  const inv = investors.find(i=>i.id===id);
+  if(!inv) return;
+  document.getElementById('invTitle').textContent = 'Edit Investor';
+  document.getElementById('invId').value = inv.id;
+  document.getElementById('invName').value = inv.name;
+  document.getElementById('invPhone').value = inv.phone||'';
+  document.getElementById('invAlt').value = inv.alt_phone||'';
+  document.getElementById('invCapital').value = inv.capital;
+  document.getElementById('invStart').value = inv.start_date||'';
+  document.getElementById('invRate').value = inv.rate;
+  document.getElementById('invRateType').value = inv.rate_type;
+  document.getElementById('invDueDay').value = inv.due_day||10;
+  document.getElementById('invKyc').checked = !!inv.kyc;
+  document.getElementById('invNotes').value = inv.notes||'';
+  closeModal('ovDetail');
+  openModal('ovInvestor');
+};
+
+document.getElementById('btnSaveInvestor').addEventListener('click', async ()=>{
+  const name = document.getElementById('invName').value.trim();
+  const phone = document.getElementById('invPhone').value.trim();
+  if(!name || !phone){ toast('Name and phone are required'); return; }
+  const id = document.getElementById('invId').value;
+  const payload = {
+    name, phone,
+    altPhone: document.getElementById('invAlt').value.trim(),
+    capital: Number(document.getElementById('invCapital').value)||0,
+    startDate: document.getElementById('invStart').value,
+    rate: Number(document.getElementById('invRate').value)||0,
+    rateType: document.getElementById('invRateType').value,
+    dueDay: Number(document.getElementById('invDueDay').value)||10,
+    kyc: document.getElementById('invKyc').checked,
+    notes: document.getElementById('invNotes').value.trim(),
+  };
+  try{
+    if(id){
+      await api(`/api/admin/investors/${id}`, {method:'PATCH', body:JSON.stringify(payload)});
+      toast('Investor updated');
+    } else {
+      const res = await api('/api/admin/investors', {method:'POST', body:JSON.stringify(payload)});
+      pendingNewPartner = { name, phone, tempPassword: res.tempPassword };
+      document.getElementById('passPartnerName').textContent = name;
+      document.getElementById('passPartnerPhone').textContent = phone;
+      document.getElementById('passPartnerTemp').textContent = res.tempPassword;
+      closeModal('ovInvestor');
+      openModal('ovPass');
+      await loadInvestors();
+      return;
+    }
+    await loadInvestors();
+    closeModal('ovInvestor');
+  }catch(e){ toast(e.message); }
+});
+
+// ---- Add / Edit Transaction ----
+document.getElementById('btnAddTxn').addEventListener('click', ()=>{
+  if(!investors.length){ toast('Add an investor first'); return; }
+  document.getElementById('txnTitle').textContent = 'Record Transaction';
+  document.getElementById('txnId').value = '';
+  document.getElementById('txnInvestor').disabled = false;
+  document.getElementById('txnInvestor').innerHTML = investors.map(i=>`<option value="${i.id}">${esc(i.name)}</option>`).join('');
+  document.getElementById('txnAmount').value='';
+  document.getElementById('txnNumber').value='';
+  document.getElementById('txnNote').value='';
+  document.getElementById('txnDue').value='';
+  document.getElementById('txnStatus').value='paid';
+  document.getElementById('txnMonth').value = new Date().toISOString().slice(0,7);
+  document.getElementById('txnNotify').checked = true;
+  document.getElementById('txnNotify').closest('.kyc-toggle').style.display = '';
+  openModal('ovTxn');
+});
+
+window.openEditTxnById = function(txnId){
+  const txn = currentDetailTxns[txnId];
+  if(txn) openEditTxn(txn);
+};
+
+window.openEditTxn = function(txn){
+  document.getElementById('txnTitle').textContent = 'Edit Transaction';
+  document.getElementById('txnId').value = txn.id;
+  document.getElementById('txnInvestor').innerHTML = investors.map(i=>`<option value="${i.id}">${esc(i.name)}</option>`).join('');
+  document.getElementById('txnInvestor').value = txn.investor_id;
+  document.getElementById('txnInvestor').disabled = true; // don't allow moving a transaction to a different investor
+  document.getElementById('txnType').value = txn.type;
+  document.getElementById('txnMonth').value = txn.month || '';
+  document.getElementById('txnAmount').value = txn.amount;
+  document.getElementById('txnNumber').value = txn.txn_number || '';
+  document.getElementById('txnDue').value = txn.due_date || '';
+  document.getElementById('txnStatus').value = txn.status || 'paid';
+  document.getElementById('txnNote').value = txn.note || '';
+  document.getElementById('txnNotify').closest('.kyc-toggle').style.display = 'none'; // don't re-notify on edits
+  openModal('ovTxn');
+};
+
+window.deleteTxn = async function(id, investorId){
+  if(!confirm('Delete this transaction? This cannot be undone.')) return;
+  try{
+    await api(`/api/admin/transactions/${id}`, {method:'DELETE'});
+    toast('Transaction deleted');
+    await loadInvestors();
+    openDetail(investorId);
+  }catch(e){ toast(e.message); }
+};
+
+document.getElementById('btnSaveTxn').addEventListener('click', async ()=>{
+  const amount = Number(document.getElementById('txnAmount').value);
+  if(!amount){ toast('Enter a valid amount'); return; }
+  const id = document.getElementById('txnId').value;
+  const investorId = document.getElementById('txnInvestor').value;
+  const payload = {
+    investorId,
+    type: document.getElementById('txnType').value,
+    month: document.getElementById('txnMonth').value,
+    amount,
+    txnNumber: document.getElementById('txnNumber').value.trim(),
+    dueDate: document.getElementById('txnDue').value,
+    status: document.getElementById('txnStatus').value,
+    note: document.getElementById('txnNote').value.trim(),
+    notifyWhatsApp: document.getElementById('txnNotify').checked,
+  };
+  try{
+    if(id){
+      await api(`/api/admin/transactions/${id}`, {method:'PATCH', body:JSON.stringify(payload)});
+      toast('Transaction updated');
+    } else {
+      const res = await api('/api/admin/transactions', {method:'POST', body:JSON.stringify(payload)});
+      if(payload.notifyWhatsApp){
+        toast(res.whatsapp?.sent ? 'Transaction recorded — WhatsApp sent' : `Transaction recorded — WhatsApp not sent (${res.whatsapp?.reason||'not configured'})`);
+      } else {
+        toast('Transaction recorded');
+      }
+    }
+    await loadInvestors();
+    closeModal('ovTxn');
+    if(currentDetailId === investorId) openDetail(investorId);
+  }catch(e){ toast(e.message); }
+});
+
+// ---- Detail ----
+window.openDetail = async function(id){
+  currentDetailId = id;
+  const inv = investors.find(i=>i.id===id);
+  if(!inv) return;
+  document.getElementById('detailName').textContent = inv.name;
+  document.getElementById('tempPassBox').innerHTML = '';
+  document.getElementById('detailMetrics').innerHTML = `
+    <div class="metric"><div class="m-lbl">Position</div><div class="m-val">${fmt(inv.stats.position)}</div></div>
+    <div class="metric"><div class="m-lbl">Next Due</div><div class="m-val" style="color:var(--gold);">${inv.stats.nextDueDate}</div></div>
+    <div class="metric"><div class="m-lbl">Profit Earned</div><div class="m-val" style="color:var(--green);">${fmt(inv.stats.profit)}</div></div>
+    <div class="metric"><div class="m-lbl">Capital Returned</div><div class="m-val" style="color:var(--teal);">${fmt(inv.stats.repaid)}</div></div>
+  `;
+  // KYC panel — shows what the investor submitted themselves, plus links to view uploaded documents.
+  // Admin still verifies manually via the KYC checkbox in Edit — nothing here auto-approves anything.
+  if(inv.kyc_submitted_at || inv.address || inv.pan){
+    document.getElementById('kycBox').innerHTML = `
+      <div>Address: ${esc(inv.address||'—')}${inv.city?', '+esc(inv.city):''}${inv.state?', '+esc(inv.state):''} ${esc(inv.pincode||'')}</div>
+      <div>PAN: ${esc(inv.pan||'—')} &nbsp; Aadhaar: ${esc(inv.aadhaar||'—')}</div>
+      <div>Bank: ${esc(inv.bank_name||'—')} — ${esc(inv.bank_account_name||'—')} — A/C ${esc(inv.bank_account_no||'—')} — IFSC ${esc(inv.ifsc||'—')}</div>
+      <div style="margin-top:8px;display:flex;gap:10px;">
+        <a class="btn btn-line btn-sm" target="_blank" href="/api/admin/investors/${inv.id}/documents/pan">View PAN Doc</a>
+        <a class="btn btn-line btn-sm" target="_blank" href="/api/admin/investors/${inv.id}/documents/aadhaar">View Aadhaar Doc</a>
+      </div>
+      ${inv.kyc_submitted_at ? `<div style="margin-top:6px;color:var(--text-mute);font-size:11.5px;">Submitted: ${new Date(inv.kyc_submitted_at).toLocaleString('en-IN')}</div>` : ''}
+    `;
+  } else {
+    document.getElementById('kycBox').innerHTML = `<div style="color:var(--text-mute);">Investor hasn't submitted KYC details yet.</div>`;
+  }
+
+  const {transactions} = await api(`/api/admin/investors/${id}/transactions`);
+  currentDetailTxns = Object.fromEntries(transactions.map(t => [t.id, t]));
+  const tagMap = {profit:['profit','Profit'], repay:['repay','Repayment'], addcap:['addcap','Capital Added']};
+  document.getElementById('detailRows').innerHTML = transactions.length ? transactions.map(t=>{
+    const [cls,label] = tagMap[t.type] || ['profit', t.type];
+    return `<tr>
+      <td>${t.month||'—'}</td><td><span class="tag ${cls}">${label}</span></td><td>${fmt(t.amount)}</td>
+      <td>${t.txn_number||'—'}</td><td>${t.due_date||'—'}</td><td><span class="tag ${t.status||'pending'}">${t.status||'pending'}</span></td>
+      <td style="display:flex;gap:6px;">
+        <button class="btn btn-line btn-sm" onclick="openEditTxnById('${t.id}')">Edit</button>
+        <button class="btn btn-line btn-sm" style="color:var(--red);border-color:var(--red);" onclick="deleteTxn('${t.id}','${id}')">Delete</button>
+      </td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="7" style="text-align:center;color:var(--text-mute);font-family:'Inter',sans-serif;">No transactions yet</td></tr>`;
+  openModal('ovDetail');
+};
+
+document.getElementById('btnEditFromDetail').addEventListener('click', ()=>{ if(currentDetailId) openEdit(currentDetailId); });
+document.getElementById('btnDownloadAgreement').addEventListener('click', ()=>{ if(currentDetailId) downloadAgreement(currentDetailId); });
+
+window.downloadAgreement = function(id){ window.location.href = `/api/admin/investors/${id}/agreement`; };
+
+document.getElementById('btnResetPass').addEventListener('click', async ()=>{
+  if(!currentDetailId) return;
+  try{
+    const res = await api(`/api/admin/investors/${currentDetailId}/reset-password`, {method:'POST', body:'{}'});
+    document.getElementById('tempPassBox').innerHTML = `<div class="temp-pass">New temporary password: <b>${res.tempPassword}</b><br>Share this with the investor securely — it won't be shown again.</div>`;
+  }catch(e){ toast(e.message); }
+});
+
+document.getElementById('btnSendWhatsApp').addEventListener('click', async ()=>{
+  if(!pendingNewPartner.phone) return;
+  const msg = `Hello ${pendingNewPartner.name},\n\nYour Partner Portal login has been created.\n\nLogin URL: http://localhost:3000/login.html\nPhone: ${pendingNewPartner.phone}\nPassword: ${pendingNewPartner.tempPassword}\n\nPlease login and update your password.\n\n- TRFSK OMKAR`;
+  try{
+    const r = await fetch('/api/admin/send-password-whatsapp', {
+      method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+      body: JSON.stringify({phone: pendingNewPartner.phone, message: msg})
+    });
+    const data = await r.json();
+    if(data.sent){
+      toast('Login details sent via WhatsApp!');
+    } else {
+      toast(`WhatsApp not sent: ${data.reason || 'check Twilio config'}`);
+    }
+  }catch(e){ toast('Failed to send WhatsApp'); }
+});
+
+document.getElementById('btnCopyCreds').addEventListener('click', ()=>{
+  const text = `Name: ${pendingNewPartner.name}\nPhone: ${pendingNewPartner.phone}\nPassword: ${pendingNewPartner.tempPassword}\nLogin URL: http://localhost:3000/login.html`;
+  navigator.clipboard.writeText(text).then(()=>{
+    toast('Credentials copied to clipboard!');
+  }).catch(()=>{
+    toast('Failed to copy');
+  });
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+  await fetch('/api/auth/admin/logout', {method:'POST', credentials:'include'});
+  window.location.href = '/admin/login.html';
+});
+
+loadInvestors().catch(()=>{});
+</script>
+</body>
+</html>

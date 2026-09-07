@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   FaLinkedin,
@@ -12,6 +13,7 @@ import {
 import { FaXTwitter } from "react-icons/fa6";
 
 import NewsletterSignup from "../ui/NewsletterSignup";
+import { createClient } from "@/app/lib/supabase/browser";
 
 const socialLinks = [
   { icon: FaLinkedin, href: "https://www.linkedin.com/in/santosh-maruti-shendkar-501355345", label: "LinkedIn" },
@@ -25,6 +27,19 @@ const socialLinks = [
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const [signedIn, setSignedIn] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    const { data: { user } } = supabase.auth.getUser();
+    setSignedIn(!!user);
+    
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSignedIn(!!session?.user);
+    });
+    
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
   return (
     <footer className="border-t border-slate-800 bg-slate-950 text-white">
@@ -205,35 +220,37 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Newsletter */}
+        {/* Newsletter - Only show when not signed in */}
 
-        <div className="mt-16 rounded-3xl border border-slate-800 bg-slate-900/60 p-10">
+        {!signedIn && (
+          <div className="mt-16 rounded-3xl border border-slate-800 bg-slate-900/60 p-10">
 
-          <div className="grid gap-8 lg:grid-cols-2">
+            <div className="grid gap-8 lg:grid-cols-2">
 
-            <div>
+              <div>
 
-              <h3 className="text-2xl font-bold">
+                <h3 className="text-2xl font-bold">
 
-                Stay Updated
+                  Stay Updated
 
-              </h3>
+                </h3>
 
-              <p className="mt-4 text-slate-400 leading-8">
+                <p className="mt-4 text-slate-400 leading-8">
 
-                Subscribe to receive financial awareness articles,
-                business insights and educational resources directly
-                in your inbox.
+                  Subscribe to receive financial awareness articles,
+                  business insights and educational resources directly
+                  in your inbox.
 
-              </p>
+                </p>
+
+              </div>
+
+              <NewsletterSignup />
 
             </div>
 
-            <NewsletterSignup />
-
           </div>
-
-        </div>
+        )}
 
         {/* Bottom */}
 
