@@ -23,7 +23,7 @@ cp .env.local.example .env.local
 **Supabase investor platform:**
 - `NEXT_PUBLIC_SUPABASE_URL`: Project URL from Supabase Project Settings → API
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Publishable/anon key from Supabase Project Settings → API
-- `NEXT_PUBLIC_AUTH_REDIRECT_URL`: Production callback URL, normally `https://trfsk-website.vercel.app/auth/callback`
+- `NEXT_PUBLIC_AUTH_REDIRECT_URL`: Production callback URL, normally `https://www.trfskomkar.com/auth/callback`
 
 Create a Supabase project, then run `supabase/migrations/202609050001_investor_platform.sql` in the SQL Editor. Enable email authentication in Authentication → Providers. After creating the first admin user through `/auth/login`, promote it once in the SQL Editor:
 ```sql
@@ -32,7 +32,7 @@ update public.profiles set role = 'admin' where id = (select id from auth.users 
 
 In Supabase Authentication → URL Configuration, set the Site URL to the production website and add these Redirect URLs:
 ```text
-https://trfsk-website.vercel.app/auth/callback
+https://www.trfskomkar.com/auth/callback
 http://localhost:3000/auth/callback
 ```
 
