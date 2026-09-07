@@ -12,8 +12,11 @@ create table if not exists public.partner_details (
   updated_at timestamptz not null default now()
 );
 
+insert into storage.buckets (id, name, public) values ('partner-documents', 'partner-documents', false) on conflict (id) do nothing;
+
 alter table public.partner_details enable row level security;
 create policy "Partners manage own details" on public.partner_details for all using (user_id = auth.uid() or public.is_admin()) with check (user_id = auth.uid() or public.is_admin());
+create policy "Partners manage own documents" on storage.objects for all using (bucket_id = 'partner-documents' and (auth.uid()::text = (storage.foldername(name))[1] or public.is_admin())) with check (bucket_id = 'partner-documents' and (auth.uid()::text = (storage.foldername(name))[1] or public.is_admin());
 
 insert into public.partner_details (user_id)
 select id from public.profiles on conflict (user_id) do nothing;
