@@ -91,7 +91,7 @@ export default async function InvestorPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <PartnerTools details={dashboard.details ?? {}} />
-        <PartnerExtras />
+        <PartnerExtras accountCode={account.account_code} />
       </div>
     </div>
   );

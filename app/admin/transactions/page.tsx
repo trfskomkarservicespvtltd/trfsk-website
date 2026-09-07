@@ -97,16 +97,18 @@ export default async function AdminTransactionsPage() {
               <tbody className="divide-y divide-slate-800">
                 {(ledger ?? []).map((entry) => {
                   const colors = entryTypeColors[entry.entry_type] || { bg: "bg-slate-400/10", text: "text-slate-300" };
+                  const account = Array.isArray(entry.investor_accounts) ? entry.investor_accounts[0] : entry.investor_accounts;
+                  const profile = account?.profiles?.[0];
                   return (
                     <tr key={entry.id} className="hover:bg-slate-800/30">
                       <td className="px-6 py-4 text-slate-400">
                         {new Date(entry.effective_at).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}
                       </td>
                       <td className="px-6 py-4 font-semibold text-white">
-                        {entry.investor_accounts?.profiles?.full_name || "Unknown"}
+                        {profile?.full_name || "Unknown"}
                       </td>
                       <td className="px-6 py-4 font-mono text-cyan-400">
-                        {entry.investor_accounts?.account_code || "N/A"}
+                        {account?.account_code || "N/A"}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${colors.bg} ${colors.text}`}>

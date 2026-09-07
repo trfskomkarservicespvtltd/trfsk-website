@@ -31,8 +31,9 @@ export default function Footer() {
 
   useEffect(() => {
     const supabase = createClient();
-    const { data: { user } } = supabase.auth.getUser();
-    setSignedIn(!!user);
+    supabase.auth.getUser().then(({ data }) => {
+      setSignedIn(!!data.user);
+    });
     
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setSignedIn(!!session?.user);
