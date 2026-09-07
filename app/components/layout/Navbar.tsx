@@ -27,14 +27,16 @@ export default function Navbar() {
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-slate-800 bg-slate-950/85 backdrop-blur-xl">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
 
-        <Link href="/" className="flex items-center" aria-label="TRFSK Omkar Services home">
+        {/* Logo */}
+
+        <Link href="/" className="flex shrink-0 items-center">
           <Image
-            src="/logo.png"
-            alt="TRFSK Omkar Services Pvt Ltd"
-            width={250}
-            height={250}
-            className="h-16 w-auto object-contain"
+            src="/logo-navbar.png"
+            alt="TRFSK Omkar Services"
+            width={474}
+            height={286}
             priority
+            className="h-14 w-auto object-contain sm:h-16"
           />
         </Link>
 

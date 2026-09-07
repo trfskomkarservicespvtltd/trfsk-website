@@ -29,6 +29,10 @@ export const metadata: Metadata = {
   authors: [{ name: "TRFSK" }],
   creator: "TRFSK",
   publisher: "TRFSK",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+  },
   formatDetection: {
     email: false,
     address: false,
