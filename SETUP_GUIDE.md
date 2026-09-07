@@ -23,10 +23,17 @@ cp .env.local.example .env.local
 **Supabase investor platform:**
 - `NEXT_PUBLIC_SUPABASE_URL`: Project URL from Supabase Project Settings → API
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Publishable/anon key from Supabase Project Settings → API
+- `NEXT_PUBLIC_AUTH_REDIRECT_URL`: Production callback URL, normally `https://trfsk-website.vercel.app/auth/callback`
 
 Create a Supabase project, then run `supabase/migrations/202609050001_investor_platform.sql` in the SQL Editor. Enable email authentication in Authentication → Providers. After creating the first admin user through `/auth/login`, promote it once in the SQL Editor:
 ```sql
 update public.profiles set role = 'admin' where id = (select id from auth.users where email = 'admin@example.com');
+```
+
+In Supabase Authentication → URL Configuration, set the Site URL to the production website and add these Redirect URLs:
+```text
+https://trfsk-website.vercel.app/auth/callback
+http://localhost:3000/auth/callback
 ```
 
 The admin portal at `/admin` links confirmed users to accounts and posts contribution, withdrawal, adjustment, and approved return entries. Investor balances are derived from those immutable entries and update through Supabase Realtime.

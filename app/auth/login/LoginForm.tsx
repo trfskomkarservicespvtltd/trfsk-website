@@ -18,12 +18,13 @@ export default function LoginForm() {
     setLoading(true);
     setMessage("");
     const supabase = createClient();
+    const authRedirectUrl = process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL ?? `${window.location.origin}/auth/callback`;
     const result = mode === "login"
       ? await supabase.auth.signInWithPassword({ email, password })
       : await supabase.auth.signUp({
           email,
           password,
-          options: { data: { full_name: fullName }, emailRedirectTo: `${window.location.origin}/auth/callback` },
+          options: { data: { full_name: fullName }, emailRedirectTo: authRedirectUrl },
         });
 
     if (result.error) {
