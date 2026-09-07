@@ -8,5 +8,10 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     await supabase.auth.exchangeCodeForSession(code);
   }
-  return NextResponse.redirect(new URL("/investor", request.url));
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: profile } = user
+    ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
+    : { data: null };
+  return NextResponse.redirect(new URL(profile?.role === "admin" ? "/admin" : "/investor", request.url));
 }
