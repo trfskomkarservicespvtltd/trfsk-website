@@ -36,7 +36,7 @@ https://www.trfskomkar.com/auth/callback
 http://localhost:3000/auth/callback
 ```
 
-The admin portal at `/admin` links confirmed users to accounts and posts contribution, withdrawal, adjustment, and approved return entries. Investor balances are derived from those immutable entries and update through Supabase Realtime.
+The migration automatically creates a partner account for every new and existing profile. The admin portal at `/admin` only posts contribution, withdrawal, adjustment, and approved return entries. Partner balances are derived from those immutable entries and update through Supabase Realtime.
 
 **Zoho SMTP Configuration:**
 - `SMTP_HOST`: Zoho SMTP host (default: smtp.zoho.in)
