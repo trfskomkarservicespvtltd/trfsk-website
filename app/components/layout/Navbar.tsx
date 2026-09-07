@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, X, ChevronDown } from "lucide-react";
 import NavLink from "../NavLink";
 
@@ -26,24 +27,15 @@ export default function Navbar() {
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-slate-800 bg-slate-950/85 backdrop-blur-xl">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
 
-        {/* Logo */}
-
-        <Link href="/" className="flex items-center gap-3">
-
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-lg font-bold text-white shadow-lg shadow-blue-600/20">
-            T
-          </div>
-
-          <div>
-            <div className="text-xl font-bold text-white tracking-wide">
-              TRFSK
-            </div>
-
-            <div className="text-xs text-slate-400">
-              Financial Awareness Platform
-            </div>
-          </div>
-
+        <Link href="/" className="flex items-center" aria-label="TRFSK Omkar Services home">
+          <Image
+            src="/logo.png"
+            alt="TRFSK Omkar Services Pvt Ltd"
+            width={250}
+            height={250}
+            className="h-16 w-auto object-contain"
+            priority
+          />
         </Link>
 
         {/* Desktop */}
