@@ -1,13 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X, ChevronDown } from "lucide-react";
 import NavLink from "../NavLink";
+import { createClient } from "@/app/lib/supabase/browser";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    void supabase.auth.getUser().then(({ data }) => setSignedIn(Boolean(data.user)));
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => setSignedIn(Boolean(session?.user)));
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
   const primaryLinks = [
     { href: "/", label: "Home" },
@@ -81,7 +91,7 @@ export default function Navbar() {
 
         <div className="hidden lg:block">
           <div className="flex items-center gap-3">
-            <Link href="/auth/login" className="px-3 py-3 text-sm font-semibold text-slate-300 transition hover:text-cyan-400">Partner Login</Link>
+            {signedIn ? <><Link href="/investor" className="px-3 py-3 text-sm font-semibold text-slate-300 transition hover:text-cyan-400">Dashboard</Link><form action="/auth/signout" method="post"><button className="px-3 py-3 text-sm font-semibold text-slate-300 transition hover:text-cyan-400">Log out</button></form></> : <Link href="/auth/login" className="px-3 py-3 text-sm font-semibold text-slate-300 transition hover:text-cyan-400">Partner Login</Link>}
             <Link href="/get-started" className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700">Get Started</Link>
           </div>
 
@@ -124,7 +134,7 @@ export default function Navbar() {
             >
               Get Started
             </Link>
-            <Link href="/auth/login" onClick={() => setMobileOpen(false)} className="mt-2 block rounded-xl border border-slate-800 py-3 text-center font-semibold text-slate-200">Partner Login</Link>
+            {signedIn ? <><Link href="/investor" onClick={() => setMobileOpen(false)} className="mt-2 block rounded-xl border border-slate-800 py-3 text-center font-semibold text-slate-200">Dashboard</Link><form action="/auth/signout" method="post"><button className="mt-2 block w-full rounded-xl border border-slate-800 py-3 text-center font-semibold text-slate-200">Log out</button></form></> : <Link href="/auth/login" onClick={() => setMobileOpen(false)} className="mt-2 block rounded-xl border border-slate-800 py-3 text-center font-semibold text-slate-200">Partner Login</Link>}
 
           </div>
 
