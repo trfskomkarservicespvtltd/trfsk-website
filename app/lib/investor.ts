@@ -6,9 +6,10 @@ type PartnerDetails = { address: string; city: string; state: string; pincode: s
 
 export async function getInvestorDashboard(userId: string) {
   const supabase = await createClient();
-  const [{ data: account }, { data: details }] = await Promise.all([
+  const [{ data: account }, { data: details }, { data: profile }] = await Promise.all([
     supabase.from("investor_accounts").select("id, account_code, currency, status, rate, rate_type, due_day, kyc_status").eq("user_id", userId).maybeSingle(),
     supabase.from("partner_details").select("address, city, state, pincode, pan, aadhaar, bank_name, bank_account_name, bank_account_no, ifsc").eq("user_id", userId).maybeSingle(),
+    supabase.from("profiles").select("full_name").eq("id", userId).maybeSingle(),
   ]);
   if (!account) return null;
 
@@ -25,5 +26,5 @@ export async function getInvestorDashboard(userId: string) {
   const monthlyRate = account.rate_type === "annual" ? Number(account.rate) / 12 : Number(account.rate);
   const nextDue = new Date();
   nextDue.setMonth(nextDue.getMonth() + 1, account.due_day);
-  return { account, details: details as PartnerDetails | null, entries, returns: (returns ?? []) as ReturnPeriod[], principal, returnsEarned, currentValue: principal + returnsEarned + adjustments - withdrawals, upcomingPayout: Math.max(principal + returnsEarned - withdrawals, 0) * (monthlyRate / 100), nextDueDate: nextDue.toISOString().slice(0, 10) };
+  return { account, profile, details: details as PartnerDetails | null, entries, returns: (returns ?? []) as ReturnPeriod[], principal, returnsEarned, currentValue: principal + returnsEarned + adjustments - withdrawals, upcomingPayout: Math.max(principal + returnsEarned - withdrawals, 0) * (monthlyRate / 100), nextDueDate: nextDue.toISOString().slice(0, 10) };
 }
