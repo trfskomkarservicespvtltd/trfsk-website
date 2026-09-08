@@ -1,24 +1,19 @@
 import { createClient } from "@/app/lib/supabase/server";
 import Link from "next/link";
-import { Search, Filter, Eye, Mail, Phone, MapPin, Calendar } from "lucide-react";
 
 export default async function AdminPartnersPage() {
   const supabase = await createClient();
   const configuredAdminEmail = (process.env.ADMIN_PORTAL_EMAIL ?? "omkar@admin.com").toLowerCase();
   
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, full_name, email, role, created_at")
+    .eq("role", "investor")
+    .order("created_at", { ascending: false });
+
   const { data: accounts } = await supabase
     .from("investor_accounts")
-    .select(`
-      id,
-      user_id,
-      account_code,
-      status,
-      currency,
-      rate,
-      rate_type,
-      created_at,
-      profiles!inner (id, full_name, email, role, created_at)
-    `)
+    .select("id, user_id, account_code, status, currency, rate, rate_type, created_at")
     .order("created_at", { ascending: false });
 
   const { data: partnerDetails } = await supabase
@@ -31,6 +26,7 @@ export default async function AdminPartnersPage() {
     .select("account_id, entry_type, amount")
     .order("created_at", { ascending: false });
 
+  const accountMap = new Map((accounts ?? []).map((a) => [a.user_id, a]));
   const detailsMap = new Map((partnerDetails ?? []).map((d) => [d.user_id, d]));
 
   const ledgerByAccount = new Map<string, { contributions: number; withdrawals: number; returns: number }>();
@@ -44,15 +40,12 @@ export default async function AdminPartnersPage() {
     if (entry.entry_type === "return") stats.returns += Number(entry.amount);
   });
 
-  const partners = (accounts ?? [])
-    .filter((account) => {
-      const profile = Array.isArray(account.profiles) ? account.profiles[0] : account.profiles;
-      return profile?.email?.toLowerCase() !== configuredAdminEmail;
-    })
-    .map((account) => {
-      const profile = Array.isArray(account.profiles) ? account.profiles[0] : account.profiles;
-      const details = detailsMap.get(account.user_id);
-      const stats = ledgerByAccount.get(account.id) || { contributions: 0, withdrawals: 0, returns: 0 };
+  const partners = (profiles ?? [])
+    .filter((profile) => profile.email?.toLowerCase() !== configuredAdminEmail)
+    .map((profile) => {
+      const account = accountMap.get(profile.id);
+      const details = detailsMap.get(profile.id);
+      const stats = account ? ledgerByAccount.get(account.id) || { contributions: 0, withdrawals: 0, returns: 0 } : { contributions: 0, withdrawals: 0, returns: 0 };
       return {
         ...profile,
         account,
@@ -104,14 +97,11 @@ export default async function AdminPartnersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
-                {partners.map((partner) => {
-                  const profile = partner.account?.profiles;
-                  const profileData = Array.isArray(profile) ? profile[0] : profile;
-                  return (
+                {partners.map((partner) => (
                   <tr key={partner.id} className="hover:bg-slate-800/30">
                     <td className="px-6 py-4">
                       <div>
-                        <p className="font-semibold text-white">{profileData?.full_name || "Unnamed Partner"}</p>
+                        <p className="font-semibold text-white">{partner.full_name || "Unnamed Partner"}</p>
                         {partner.details && (
                           <p className="mt-1 flex items-center gap-2 text-xs text-slate-500">
                             {partner.details.city && <span>{partner.details.city}</span>}
@@ -144,12 +134,11 @@ export default async function AdminPartnersPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-slate-400">
-                        {profileData?.created_at ? new Date(profileData.created_at).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" }) : "N/A"}
+                        {partner.created_at ? new Date(partner.created_at).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" }) : "N/A"}
                       </span>
                     </td>
                   </tr>
-                  );
-                })}
+                ))}
               </tbody>
             </table>
           </div>
