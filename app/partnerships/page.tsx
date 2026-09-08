@@ -1,5 +1,3 @@
-"use client";
-
 import { Metadata } from "next";
 import { siteConfig, absoluteUrl } from "@/app/lib/siteConfig";
 
