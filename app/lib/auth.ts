@@ -17,8 +17,6 @@ export async function requireAdmin() {
   const user = await requireUser();
   const supabase = await createClient();
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  const configuredAdminEmail = (process.env.ADMIN_PORTAL_EMAIL ?? "omkar@admin.com").toLowerCase();
-  const isConfiguredAdmin = user.email?.toLowerCase() === configuredAdminEmail;
-  if (profile?.role !== "admin" && !isConfiguredAdmin) redirect("/investor");
+  if (profile?.role !== "admin") redirect("/investor");
   return user;
 }

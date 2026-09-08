@@ -3,11 +3,10 @@ import Link from "next/link";
 
 export default async function AdminPartnersPage() {
   const supabase = await createClient();
-  const configuredAdminEmail = (process.env.ADMIN_PORTAL_EMAIL ?? "omkar@admin.com").toLowerCase();
   
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, full_name, email, role, created_at")
+    .select("id, full_name, role, created_at")
     .eq("role", "investor")
     .order("created_at", { ascending: false });
 
@@ -41,7 +40,6 @@ export default async function AdminPartnersPage() {
   });
 
   const partners = (profiles ?? [])
-    .filter((profile) => profile.email?.toLowerCase() !== configuredAdminEmail)
     .map((profile) => {
       const account = accountMap.get(profile.id);
       const details = detailsMap.get(profile.id);
