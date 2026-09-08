@@ -1,5 +1,7 @@
 import { createClient } from "@/app/lib/supabase/server";
 import AdminDashboard from "./AdminDashboard";
+import AdminForms from "./AdminForms";
+import RecordPayoutForm from "./forms/RecordPayoutForm";
 import Link from "next/link";
 
 export default async function AdminPage() {
@@ -15,6 +17,12 @@ export default async function AdminPage() {
   const names = new Map((profiles ?? []).map((profile) => [profile.id, profile.full_name]));
   const partnerAccounts = (accounts ?? []).filter((account) => investorIds.has(account.user_id));
   const accountNames = new Map(partnerAccounts.map((account) => [account.id, names.get(account.user_id) || "Unnamed partner"]));
+  const formAccounts = partnerAccounts.map((account) => ({
+    id: account.id,
+    account_code: account.account_code,
+    user_id: account.user_id,
+    partnerName: names.get(account.user_id) || "Unnamed partner",
+  }));
 
   const entries = ledger ?? [];
   const total = (type: string) => entries.filter((entry) => entry.entry_type === type).reduce((sum, entry) => sum + Number(entry.amount), 0);
@@ -72,6 +80,11 @@ export default async function AdminPage() {
       </div>
 
       <AdminDashboard />
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <AdminForms accounts={formAccounts} />
+        <RecordPayoutForm accounts={formAccounts} />
+      </div>
 
       <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
         <div className="flex items-center justify-between">
