@@ -1,5 +1,24 @@
 "use client";
 
+import { Metadata } from "next";
+import { siteConfig, absoluteUrl } from "@/app/lib/siteConfig";
+
+export const metadata: Metadata = {
+  title: "Partnerships | TRFSK - Business Partnership Programs",
+  description: "Explore TRFSK partnership programs for entrepreneurs, investors, and businesses. Join our network for growth, collaboration, and financial opportunities.",
+  keywords: "TRFSK partnerships, business partnership programs, partner with TRFSK, business collaboration, financial partnerships, entrepreneur network, investor partnerships",
+  metadataBase: new URL(siteConfig.url),
+  alternates: { canonical: absoluteUrl("/partnerships") },
+  openGraph: {
+    title: "Partnerships - Business Partnership Programs | TRFSK",
+    description: "Explore TRFSK partnership programs for entrepreneurs, investors, and businesses.",
+    url: absoluteUrl("/partnerships"),
+    siteName: "TRFSK",
+    locale: "en_IN",
+    type: "website",
+  },
+};
+
 import Link from "next/link";
 import {
   ArrowRight,

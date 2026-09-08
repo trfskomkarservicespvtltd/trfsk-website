@@ -7,19 +7,28 @@ import {
 
 import Reveal from "../components/ui/Reveal";
 import ContactForm from "../components/forms/ContactForm";
-import { siteConfig } from "@/app/lib/siteConfig";
+import { siteConfig, absoluteUrl } from "@/app/lib/siteConfig";
 
 export const metadata = {
-  title: "Contact Us - Get in Touch with TRFSK | TRFSK",
-  description:
-    "Have questions or interested in partnerships? Contact TRFSK today. We are here to help you succeed.",
-  keywords: "contact, inquiry, partnership, support",
+  title: "Contact TRFSK - Financial Awareness & Business Education Pune",
+  description: "Contact TRFSK for financial education, business partnerships, and investment guidance. Located in Katraj, Pune. Call +91 81693 02861 or email care@trfskomkar.com.",
+  keywords: "contact TRFSK, financial education contact, business partnership inquiry, TRFSK Pune, financial advisor contact, investment guidance inquiry, Katraj Pune office",
+  metadataBase: new URL(siteConfig.url),
+  alternates: { canonical: absoluteUrl("/contact") },
   openGraph: {
-    title: "Contact Us - Get in Touch with TRFSK | TRFSK",
-    description:
-      "Have questions or interested in partnerships? Contact TRFSK today.",
-    url: `${siteConfig.url}/contact`,
+    title: "Contact TRFSK - Financial Education & Business Partnerships",
+    description: "Get in touch with TRFSK for financial education, business partnerships, and investment opportunities in Pune.",
+    url: absoluteUrl("/contact"),
+    siteName: "TRFSK",
+    locale: "en_IN",
     type: "website",
+    images: [{ url: absoluteUrl("/og-contact.png"), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Contact TRFSK - Financial Education & Business Partnerships",
+    description: "Get in touch with TRFSK for financial education, business partnerships, and investment opportunities in Pune.",
+    images: [absoluteUrl("/og-contact.png")],
   },
 };
 

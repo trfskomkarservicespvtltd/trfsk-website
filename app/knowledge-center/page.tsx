@@ -1,5 +1,24 @@
 "use client";
 
+import { Metadata } from "next";
+import { siteConfig, absoluteUrl } from "@/app/lib/siteConfig";
+
+export const metadata: Metadata = {
+  title: "Knowledge Center - Financial Education Resources | TRFSK",
+  description: "Access TRFSK's knowledge center with articles, guides, and resources on financial literacy, business strategy, and investment education.",
+  keywords: "knowledge center, financial education resources, business guides, investment education, financial literacy articles, entrepreneurship resources, TRFSK learning",
+  metadataBase: new URL(siteConfig.url),
+  alternates: { canonical: absoluteUrl("/knowledge-center") },
+  openGraph: {
+    title: "Knowledge Center - Financial Education Resources",
+    description: "Access TRFSK's knowledge center with articles, guides, and resources on financial literacy and business strategy.",
+    url: absoluteUrl("/knowledge-center"),
+    siteName: "TRFSK",
+    locale: "en_IN",
+    type: "website",
+  },
+};
+
 import Link from "next/link";
 import {
   ArrowRight,

@@ -3,79 +3,80 @@ import { siteConfig } from '@/app/lib/siteConfig';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = siteConfig.url;
+  const now = new Date();
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'weekly',
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/about`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
+      priority: 1.0,
     },
     {
       url: `${baseUrl}/services`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
+      lastModified: now,
+      changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/partnerships`,
-      lastModified: new Date(),
+      url: `${baseUrl}/about`,
+      lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/contact`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/blog`,
-      lastModified: new Date(),
+      url: `${baseUrl}/partnerships`,
+      lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/team`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.7,
     },
     {
       url: `${baseUrl}/knowledge-center`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.8,
     },
     {
+      url: `${baseUrl}/blog`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.7,
+    },
+    {
       url: `${baseUrl}/get-started`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
+      url: `${baseUrl}/contact`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/team`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
       url: `${baseUrl}/privacy-policy`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'yearly',
-      priority: 0.5,
+      priority: 0.3,
     },
     {
       url: `${baseUrl}/terms-and-conditions`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'yearly',
-      priority: 0.5,
+      priority: 0.3,
     },
     {
       url: `${baseUrl}/disclaimer`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'yearly',
-      priority: 0.5,
+      priority: 0.3,
     },
   ];
 

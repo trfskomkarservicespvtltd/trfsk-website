@@ -2,16 +2,22 @@ import { Metadata } from 'next';
 import { Mail } from 'lucide-react';
 import Reveal from '../components/ui/Reveal';
 import SectionTitle from '../components/ui/SectionTitle';
-import { siteConfig } from '@/app/lib/siteConfig';
+import { siteConfig, absoluteUrl } from '@/app/lib/siteConfig';
 
 export const metadata: Metadata = {
   title: 'Our Team - Meet the TRFSK Leadership | TRFSK',
-  description: 'Meet the experienced team behind TRFSK driving financial awareness, entrepreneurship, and business education.',
+  description: 'Meet the experienced leadership team at TRFSK driving financial awareness, entrepreneurship education, and business growth in Pune.',
+  keywords: 'TRFSK team, leadership team, financial education team, business educators, TRFSK founders, Pune business leaders, entrepreneurship mentors',
+  metadataBase: new URL(siteConfig.url),
+  alternates: { canonical: absoluteUrl("/team") },
   openGraph: {
-    title: 'Our Team - Meet the TRFSK Leadership | TRFSK',
+    title: 'Our Team - Meet the TRFSK Leadership',
     description: 'Meet the experienced team behind TRFSK driving financial awareness, entrepreneurship, and business education.',
-    url: `${siteConfig.url}/team`,
-    type: 'website',
+    url: absoluteUrl("/team"),
+    siteName: "TRFSK",
+    locale: "en_IN",
+    type: "website",
+    images: [{ url: absoluteUrl("/og-team.png"), width: 1200, height: 630 }],
   },
 };
 

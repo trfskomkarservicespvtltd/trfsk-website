@@ -2,17 +2,22 @@ import { Metadata } from 'next';
 import Reveal from '../components/ui/Reveal';
 import SectionTitle from '../components/ui/SectionTitle';
 import BlogSearchFilter from '../components/ui/BlogSearchFilter';
-import { siteConfig } from '@/app/lib/siteConfig';
+import { siteConfig, absoluteUrl } from '@/app/lib/siteConfig';
 
 export const metadata: Metadata = {
   title: 'Blog - Financial & Business Insights | TRFSK',
-  description: 'Read the latest articles on financial education, entrepreneurship, investment guidance, and business strategy.',
-  keywords: 'blog, financial insights, business articles, investment tips, entrepreneurship',
+  description: 'Read the latest articles on financial education, entrepreneurship, investment guidance, and business strategy from TRFSK experts.',
+  keywords: 'TRFSK blog, financial insights, business articles, investment tips, entrepreneurship blog, financial literacy articles, business strategy, Pune financial blog',
+  metadataBase: new URL(siteConfig.url),
+  alternates: { canonical: absoluteUrl("/blog") },
   openGraph: {
     title: 'Blog - Financial & Business Insights | TRFSK',
     description: 'Read the latest articles on financial education, entrepreneurship, investment guidance, and business strategy.',
-    url: `${siteConfig.url}/blog`,
-    type: 'website',
+    url: absoluteUrl("/blog"),
+    siteName: "TRFSK",
+    locale: "en_IN",
+    type: "website",
+    images: [{ url: absoluteUrl("/og-blog.png"), width: 1200, height: 630 }],
   },
 };
 

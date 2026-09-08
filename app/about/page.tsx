@@ -1,5 +1,24 @@
 "use client";
 
+import { Metadata } from "next";
+import { siteConfig, absoluteUrl } from "@/app/lib/siteConfig";
+
+export const metadata: Metadata = {
+  title: "About Us | TRFSK - Financial Awareness & Business Education",
+  description: "Learn about TRFSK's mission to promote financial awareness, entrepreneurship, and business education in Pune. Discover our team, values, and commitment to empowering professionals.",
+  keywords: "about TRFSK, TRFSK team, financial education Pune, business education company, TRFSK mission, entrepreneurship support, professional networking organization",
+  metadataBase: new URL(siteConfig.url),
+  alternates: { canonical: absoluteUrl("/about") },
+  openGraph: {
+    title: "About TRFSK - Our Mission & Team",
+    description: "TRFSK is committed to building financial awareness and business education that empowers entrepreneurs and professionals.",
+    url: absoluteUrl("/about"),
+    siteName: "TRFSK",
+    locale: "en_IN",
+    type: "website",
+  },
+};
+
 import Link from "next/link";
 import {
   ArrowRight,

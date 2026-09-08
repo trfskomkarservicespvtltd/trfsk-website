@@ -1,5 +1,24 @@
 "use client";
 
+import { Metadata } from "next";
+import { siteConfig, absoluteUrl } from "@/app/lib/siteConfig";
+
+export const metadata: Metadata = {
+  title: "Get Started | TRFSK - Join Our Financial Education & Investment Platform",
+  description: "Get started with TRFSK. Join our financial education platform, explore investment opportunities, and start your journey towards financial growth.",
+  keywords: "get started TRFSK, join TRFSK, financial education registration, investment platform signup, partner with TRFSK, start investing, financial growth journey",
+  metadataBase: new URL(siteConfig.url),
+  alternates: { canonical: absoluteUrl("/get-started") },
+  openGraph: {
+    title: "Get Started with TRFSK - Financial Education & Investment",
+    description: "Join TRFSK today and start your journey towards financial growth and business success.",
+    url: absoluteUrl("/get-started"),
+    siteName: "TRFSK",
+    locale: "en_IN",
+    type: "website",
+  },
+};
+
 import Link from "next/link";
 import {
   ArrowRight,

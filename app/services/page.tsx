@@ -1,5 +1,24 @@
 "use client";
 
+import { Metadata } from "next";
+import { siteConfig, absoluteUrl } from "@/app/lib/siteConfig";
+
+export const metadata: Metadata = {
+  title: "Services | TRFSK - Financial Education & Business Growth",
+  description: "Explore TRFSK services including financial education, business partnerships, investment guidance, and professional networking. Structured growth for entrepreneurs and investors.",
+  keywords: "TRFSK services, financial education services, business partnership programs, investment guidance, professional networking services, Pune financial services, business growth programs",
+  metadataBase: new URL(siteConfig.url),
+  alternates: { canonical: absoluteUrl("/services") },
+  openGraph: {
+    title: "TRFSK Services - Financial Education & Growth",
+    description: "Discover TRFSK services: financial education, business partnerships, investment guidance, and professional networking.",
+    url: absoluteUrl("/services"),
+    siteName: "TRFSK",
+    locale: "en_IN",
+    type: "website",
+  },
+};
+
 import Link from "next/link";
 import {
   ArrowRight,
