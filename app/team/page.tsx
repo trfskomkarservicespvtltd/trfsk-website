@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     siteName: "TRFSK",
     locale: "en_IN",
     type: "website",
-    images: [{ url: absoluteUrl("/og-team.png"), width: 1200, height: 630 }],
+    images: [{ url: absoluteUrl("/api/og?title=Our%20Team%20-%20Meet%20the%20TRFSK%20Leadership&description=Meet%20the%20experienced%20leadership%20team%20at%20TRFSK%20driving%20financial%20awareness%2C%20entrepreneurship%20education%2C%20and%20business%20growth%20in%20Pune."), width: 1200, height: 630 }],
   },
 };
 

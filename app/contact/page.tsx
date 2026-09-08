@@ -22,13 +22,13 @@ export const metadata = {
     siteName: "TRFSK",
     locale: "en_IN",
     type: "website",
-    images: [{ url: absoluteUrl("/og-contact.png"), width: 1200, height: 630 }],
+    images: [{ url: absoluteUrl("/api/og?title=Contact%20TRFSK&description=Get%20in%20touch%20with%20TRFSK%20for%20financial%20education%2C%20business%20partnerships%2C%20and%20investment%20opportunities%20in%20Pune."), width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Contact TRFSK - Financial Education & Business Partnerships",
     description: "Get in touch with TRFSK for financial education, business partnerships, and investment opportunities in Pune.",
-    images: [absoluteUrl("/og-contact.png")],
+    images: [absoluteUrl("/api/og?title=Contact%20TRFSK&description=Get%20in%20touch%20with%20TRFSK%20for%20financial%20education%2C%20business%20partnerships%2C%20and%20investment%20opportunities%20in%20Pune.")],
   },
 };
 

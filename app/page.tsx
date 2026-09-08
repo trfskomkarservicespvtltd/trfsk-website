@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: absoluteUrl("/og-home.png"),
+        url: absoluteUrl("/api/og?title=TRFSK%20-%20Financial%20Awareness%20%26%20Investment%20Platform&description=Leading%20financial%20awareness%2C%20business%20education%2C%20and%20professional%20networking%20platform%20in%20Pune."),
         width: 1200,
         height: 630,
         alt: "TRFSK - Financial Awareness & Investment Platform",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "TRFSK - Financial Awareness & Investment Platform",
     description: "Leading financial awareness, business education, and professional networking platform in Pune.",
-    images: [absoluteUrl("/og-home.png")],
+    images: [absoluteUrl("/api/og?title=TRFSK%20-%20Financial%20Awareness%20%26%20Investment%20Platform&description=Leading%20financial%20awareness%2C%20business%20education%2C%20and%20professional%20networking%20platform%20in%20Pune.")],
   },
   robots: {
     index: true,

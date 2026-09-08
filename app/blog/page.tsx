@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     siteName: "TRFSK",
     locale: "en_IN",
     type: "website",
-    images: [{ url: absoluteUrl("/og-blog.png"), width: 1200, height: 630 }],
+    images: [{ url: absoluteUrl("/api/og?title=Blog%20-%20Financial%20%26%20Business%20Insights&description=Read%20the%20latest%20articles%20on%20financial%20education%2C%20entrepreneurship%2C%20investment%20guidance%2C%20and%20business%20strategy%20from%20TRFSK%20experts."), width: 1200, height: 630 }],
   },
 };
 

@@ -11,11 +11,12 @@ export const metadata: Metadata = {
   alternates: { canonical: absoluteUrl("/partnerships") },
   openGraph: {
     title: "Partnerships - Business Partnership Programs | TRFSK",
-    description: "Explore TRFSK partnership programs for entrepreneurs, investors, and businesses.",
+    description: "Explore TRFSK partnership programs for entrepreneurs, investors, and businesses. Join our network for growth, collaboration, and financial opportunities.",
     url: absoluteUrl("/partnerships"),
     siteName: "TRFSK",
     locale: "en_IN",
     type: "website",
+    images: [{ url: absoluteUrl("/api/og?title=Partnerships%20-%20Business%20Partnership%20Programs&description=Explore%20TRFSK%20partnership%20programs%20for%20entrepreneurs%2C%20investors%2C%20and%20businesses."), width: 1200, height: 630 }],
   },
 };
 

@@ -16,6 +16,7 @@ export const metadata: Metadata = {
     siteName: "TRFSK",
     locale: "en_IN",
     type: "website",
+    images: [{ url: absoluteUrl("/api/og?title=About%20TRFSK%20-%20Our%20Mission%20%26%20Team&description=TRFSK%20is%20committed%20to%20building%20financial%20awareness%20and%20business%20education%20that%20empowers%20entrepreneurs%20and%20professionals."), width: 1200, height: 630 }],
   },
 };
 

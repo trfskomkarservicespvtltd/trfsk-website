@@ -16,6 +16,7 @@ export const metadata: Metadata = {
     siteName: "TRFSK",
     locale: "en_IN",
     type: "website",
+    images: [{ url: absoluteUrl("/api/og?title=Knowledge%20Center%20-%20Financial%20Education%20Resources&description=Access%20TRFSK%20knowledge%20center%20with%20articles%2C%20guides%2C%20and%20resources%20on%20financial%20literacy%20and%20business%20strategy."), width: 1200, height: 630 }],
   },
 };
 

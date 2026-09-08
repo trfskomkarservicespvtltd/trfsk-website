@@ -16,6 +16,7 @@ export const metadata: Metadata = {
     siteName: "TRFSK",
     locale: "en_IN",
     type: "website",
+    images: [{ url: absoluteUrl("/api/og?title=Get%20Started%20with%20TRFSK&description=Join%20TRFSK%20today%20and%20start%20your%20journey%20towards%20financial%20growth%20and%20business%20success."), width: 1200, height: 630 }],
   },
 };
 

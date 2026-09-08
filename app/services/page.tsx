@@ -16,6 +16,7 @@ export const metadata: Metadata = {
     siteName: "TRFSK",
     locale: "en_IN",
     type: "website",
+    images: [{ url: absoluteUrl("/api/og?title=TRFSK%20Services%20-%20Financial%20Education%20%26%20Business%20Growth&description=Discover%20TRFSK%20services%3A%20financial%20education%2C%20business%20partnerships%2C%20investment%20guidance%2C%20and%20professional%20networking."), width: 1200, height: 630 }],
   },
 };
 
