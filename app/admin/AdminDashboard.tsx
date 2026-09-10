@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CheckCircle, XCircle, Clock, TrendingUp, Search } from "lucide-react";
+import { CheckCircle, XCircle, Clock, TrendingUp, ArrowUpDown, Search } from "lucide-react";
 
 type FundAdditionRequest = {
   id: string;
