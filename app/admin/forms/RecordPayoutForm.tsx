@@ -51,8 +51,8 @@ export default function RecordPayoutForm({ accounts }: { accounts: Account[] }) 
         <div className="grid gap-4 md:grid-cols-2">
           <label className="text-sm text-slate-400">Partner Account<select value={form.account_id} onChange={(e) => update("account_id", e.target.value)} required className="field mt-2"><option value="">Select partner</option>{accounts.map((a) => (<option key={a.id} value={a.id}>{a.account_code}</option>))}</select></label>
           <label className="text-sm text-slate-400">Payout Amount (INR)<input type="number" value={form.amount} onChange={(e) => update("amount", e.target.value)} required className="field mt-2" /></label>
-          <label className="text-sm text-slate-400">Period Start<input type="date" value={form.period_start} onChange={(e) => update("period_start", e.target.value)} className="field mt-2" /></label>
-          <label className="text-sm text-slate-400">Period End<input type="date" value={form.period_end} onChange={(e) => update("period_end", e.target.value)} className="field mt-2" /></label>
+          <label className="text-sm text-slate-400">Period Start<input type="date" value={form.period_start} onChange={(e) => update("period_start", e.target.value)} required className="field mt-2" /></label>
+          <label className="text-sm text-slate-400">Period End<input type="date" value={form.period_end} onChange={(e) => update("period_end", e.target.value)} required className="field mt-2" /></label>
           <label className="text-sm text-slate-400">Transaction Reference<input value={form.transaction_reference} onChange={(e) => update("transaction_reference", e.target.value)} className="field mt-2" /></label>
           <label className="text-sm text-slate-400">Notes<input value={form.notes} onChange={(e) => update("notes", e.target.value)} className="field mt-2" /></label>
         </div>

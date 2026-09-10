@@ -39,10 +39,10 @@ export default async function InvestorPage() {
         <Metric label="Upcoming payout" value={money(dashboard.upcomingPayout, account.currency)} accent="text-amber-300" />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Metric label="Total withdrawn" value={money(dashboard.entries.filter((entry) => entry.entry_type === "withdrawal").reduce((total, entry) => total + entry.amount, 0), account.currency)} accent="text-teal-300" />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Metric label="Payout rate" value={`${account.rate}% ${account.rate_type === "annual" ? "p.a." : "monthly"}`} accent="text-cyan-300" />
         <Metric label="Next due date" value={dashboard.nextDueDate} accent="text-slate-200" />
+        <Metric label="KYC status" value={account.kyc_status} accent="text-amber-300" />
       </div>
 
       <FundActions accountId={account.id} />
@@ -72,11 +72,11 @@ export default async function InvestorPage() {
                       entry.entry_type === "withdrawal" ? "bg-rose-400/10 text-rose-300" :
                       "bg-slate-400/10 text-slate-300"
                     }`}>
-                      {entry.entry_type}
+                      {entry.entry_type === "return" ? "monthly payout" : entry.entry_type}
                     </span>
                   </td>
                   <td className="py-3 pr-4 font-semibold">
-                    {entry.entry_type === "withdrawal" ? "-" : "+"}{money(entry.amount, account.currency)}
+                    {entry.entry_type === "contribution" || entry.entry_type === "adjustment" ? "+" : "-"}{money(entry.amount, account.currency)}
                   </td>
                   <td className="py-3 pr-4">{new Date(entry.effective_at).toLocaleDateString("en-IN")}</td>
                   <td className="py-3 text-slate-500">{entry.reference}</td>
@@ -86,6 +86,30 @@ export default async function InvestorPage() {
               )}
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-white">Fund addition requests</h2>
+            <p className="mt-1 text-sm text-slate-500">Funds appear in your account only after admin approval.</p>
+          </div>
+          <span className="text-sm text-slate-500">{dashboard.fundAdditions.length} requests</span>
+        </div>
+        <div className="mt-5 space-y-3">
+          {dashboard.fundAdditions.length > 0 ? dashboard.fundAdditions.map((request) => (
+            <div key={request.id} className="flex flex-col justify-between gap-2 rounded-xl border border-slate-800 bg-slate-950/60 p-4 sm:flex-row sm:items-center">
+              <div>
+                <p className="font-semibold text-white">{money(request.amount, account.currency)}</p>
+                <p className="mt-1 text-xs text-slate-500">{request.payment_method.replace("_", " ")} · {new Date(request.created_at).toLocaleDateString("en-IN")}</p>
+                {request.rejection_reason && <p className="mt-1 text-xs text-rose-300">{request.rejection_reason}</p>}
+              </div>
+              <span className={`w-fit rounded-full border px-3 py-1 text-xs font-semibold ${request.status === "approved" ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300" : request.status === "rejected" ? "border-rose-400/30 bg-rose-400/10 text-rose-300" : "border-amber-400/30 bg-amber-400/10 text-amber-300"}`}>
+                {request.status}
+              </span>
+            </div>
+          )) : <p className="py-6 text-center text-sm text-slate-500">No fund addition requests yet.</p>}
         </div>
       </section>
 

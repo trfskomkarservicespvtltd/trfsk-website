@@ -4,47 +4,25 @@ import { createClient } from "@/app/lib/supabase/server";
 
 export async function POST(request: Request) {
   try {
-    await requireAdmin();
+    const adminUser = await requireAdmin();
     const supabase = await createClient();
     
     const { account_id, amount, period_start, period_end, transaction_reference, notes } = await request.json();
 
-    if (!account_id || !amount || amount <= 0) {
-      return NextResponse.json({ error: "Valid account and amount required" }, { status: 400 });
+    if (!account_id || !amount || amount <= 0 || !period_start || !period_end) {
+      return NextResponse.json({ error: "Account, amount, period start, and period end are required" }, { status: 400 });
     }
 
-    const adminUser = await requireAdmin();
-    const reference = `PAYOUT-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    const { data: ledgerEntry, error: payoutError } = await supabase.rpc("record_monthly_payout", {
+      payout_account_id: account_id,
+      payout_amount: parseFloat(amount),
+      payout_period_start: period_start,
+      payout_period_end: period_end,
+      payout_notes: notes || `Monthly payout. Transaction: ${transaction_reference || "N/A"}`,
+      admin_id: adminUser.id,
+    });
 
-    const { data: ledgerEntry, error: ledgerError } = await supabase
-      .from("ledger_entries")
-      .insert({
-        account_id,
-        entry_type: "return",
-        amount: parseFloat(amount),
-        effective_at: new Date().toISOString(),
-        reference,
-        notes: notes || `Monthly payout for period ${period_start} to ${period_end}. Tx: ${transaction_reference || "N/A"}`,
-        created_by: adminUser.id,
-      })
-      .select()
-      .single();
-
-    if (ledgerError) {
-      return NextResponse.json({ error: ledgerError.message }, { status: 500 });
-    }
-
-    if (period_start && period_end) {
-      await supabase.from("return_periods").insert({
-        account_id,
-        period_start,
-        period_end,
-        return_amount: parseFloat(amount),
-        status: "approved",
-        approved_by: adminUser.id,
-        approved_at: new Date().toISOString(),
-      });
-    }
+    if (payoutError) return NextResponse.json({ error: payoutError.message }, { status: 400 });
 
     return NextResponse.json({ success: true, data: ledgerEntry });
   } catch (error) {

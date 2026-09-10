@@ -26,7 +26,6 @@ export default async function TransactionsPage() {
   const money = (value: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: account.currency }).format(value);
   
   const totalContributions = entries.filter((e) => e.entry_type === "contribution").reduce((sum, e) => sum + e.amount, 0);
-  const totalWithdrawals = entries.filter((e) => e.entry_type === "withdrawal").reduce((sum, e) => sum + e.amount, 0);
   const totalReturns = entries.filter((e) => e.entry_type === "return").reduce((sum, e) => sum + e.amount, 0);
 
   const entryTypeColors: Record<string, { bg: string; text: string; border: string }> = {
@@ -61,7 +60,7 @@ export default async function TransactionsPage() {
             </div>
           </div>
           
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <div className="rounded-xl border border-emerald-400/20 bg-slate-800/50 p-4">
               <p className="text-sm text-slate-500">Total Contributed</p>
               <p className="mt-2 text-2xl font-semibold text-emerald-300">{money(totalContributions)}</p>
@@ -69,10 +68,6 @@ export default async function TransactionsPage() {
             <div className="rounded-xl border border-cyan-400/20 bg-slate-800/50 p-4">
               <p className="text-sm text-slate-500">Total Returns Earned</p>
               <p className="mt-2 text-2xl font-semibold text-cyan-300">{money(totalReturns)}</p>
-            </div>
-            <div className="rounded-xl border border-rose-400/20 bg-slate-800/50 p-4">
-              <p className="text-sm text-slate-500">Total Withdrawn</p>
-              <p className="mt-2 text-2xl font-semibold text-rose-300">{money(totalWithdrawals)}</p>
             </div>
           </div>
         </div>
@@ -95,7 +90,7 @@ export default async function TransactionsPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
                           <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${colors.bg} ${colors.text} ${colors.border}`}>
-                            {entry.entry_type}
+                            {entry.entry_type === "return" ? "monthly payout" : entry.entry_type}
                           </span>
                           {entry.notes && (
                             <span className="text-xs text-slate-500">{entry.notes}</span>
@@ -109,7 +104,7 @@ export default async function TransactionsPage() {
                         </div>
                       </div>
                       <div className={`text-right font-semibold ${entry.entry_type === "withdrawal" ? "text-rose-300" : "text-emerald-300"}`}>
-                        {entry.entry_type === "withdrawal" ? "-" : "+"}{money(entry.amount)}
+                        {entry.entry_type === "contribution" || entry.entry_type === "adjustment" ? "+" : "-"}{money(entry.amount)}
                       </div>
                     </div>
                   </div>

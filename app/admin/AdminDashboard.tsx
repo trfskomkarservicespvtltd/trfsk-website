@@ -1,19 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CheckCircle, XCircle, Clock, TrendingUp, Users, Wallet, ArrowUpDown, Search, Filter, Eye } from "lucide-react";
-
-type WithdrawalRequest = {
-  id: string;
-  amount: number;
-  status: string;
-  payment_method: string | null;
-  created_at: string;
-  investor_accounts: {
-    account_code: string;
-    profiles: { full_name: string; email: string };
-  };
-};
+import { CheckCircle, XCircle, Clock, TrendingUp, Search } from "lucide-react";
 
 type FundAdditionRequest = {
   id: string;
@@ -23,16 +11,15 @@ type FundAdditionRequest = {
   created_at: string;
   investor_accounts: {
     account_code: string;
-    profiles: { full_name: string; email: string };
+    profiles: { full_name: string };
   };
 };
 
 export default function AdminDashboard() {
-  const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
   const [fundAdditions, setFundAdditions] = useState<FundAdditionRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"withdrawals" | "additions">("withdrawals");
+  const [activeTab, setActiveTab] = useState<"pending" | "additions">("pending");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
@@ -45,7 +32,6 @@ export default function AdminDashboard() {
     try {
       const res = await fetch("/api/admin/funds");
       const data = await res.json();
-      if (data.withdrawals) setWithdrawals(data.withdrawals);
       if (data.fund_additions) setFundAdditions(data.fund_additions);
     } catch (error) {
       console.error("Failed to fetch requests");
@@ -53,13 +39,13 @@ export default function AdminDashboard() {
     setLoading(false);
   }
 
-  async function handleAction(id: string, type: "withdrawal" | "fund_addition", action: "approve" | "reject" | "complete", rejectionReason?: string) {
+  async function handleAction(id: string, action: "approve" | "reject", rejectionReason?: string) {
     setProcessing(id);
     try {
       const res = await fetch("/api/admin/funds", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, action, id, rejection_reason: rejectionReason }),
+        body: JSON.stringify({ type: "fund_addition", action, id, rejection_reason: rejectionReason }),
       });
       if (res.ok) {
         fetchRequests();
@@ -70,10 +56,9 @@ export default function AdminDashboard() {
     setProcessing(null);
   }
 
-  const pendingWithdrawals = withdrawals.filter((w) => w.status === "pending");
   const pendingAdditions = fundAdditions.filter((f) => f.status === "pending");
 
-  const filteredRequests = activeTab === "withdrawals" ? withdrawals : fundAdditions;
+  const filteredRequests = activeTab === "pending" ? pendingAdditions : fundAdditions;
   const filtered = filteredRequests.filter((req) => {
     const matchesSearch = searchTerm === "" || 
       req.investor_accounts?.profiles?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -93,12 +78,12 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="rounded-2xl border border-amber-400/20 bg-gradient-to-br from-amber-500/10 to-amber-600/5 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-400">Pending Withdrawals</p>
-              <p className="mt-2 text-3xl font-bold text-white">{pendingWithdrawals.length}</p>
+              <p className="text-sm text-slate-400">Pending Fund Approvals</p>
+              <p className="mt-2 text-3xl font-bold text-white">{pendingAdditions.length}</p>
             </div>
             <div className="rounded-full bg-amber-400/10 p-3">
               <Clock className="text-amber-400" size={24} />
@@ -109,8 +94,8 @@ export default function AdminDashboard() {
         <div className="rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-400">Pending Additions</p>
-              <p className="mt-2 text-3xl font-bold text-white">{pendingAdditions.length}</p>
+              <p className="text-sm text-slate-400">Approved Fund Additions</p>
+              <p className="mt-2 text-3xl font-bold text-white">{fundAdditions.filter((f) => f.status === "approved").length}</p>
             </div>
             <div className="rounded-full bg-cyan-400/10 p-3">
               <TrendingUp className="text-cyan-400" size={24} />
@@ -121,9 +106,9 @@ export default function AdminDashboard() {
         <div className="rounded-2xl border border-emerald-400/20 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-400">Total Withdrawals</p>
+              <p className="text-sm text-slate-400">Total Approved Additions</p>
               <p className="mt-2 text-3xl font-bold text-white">
-                {formatCurrency(withdrawals.filter((w) => w.status !== "rejected").reduce((sum, w) => sum + w.amount, 0))}
+                {formatCurrency(fundAdditions.filter((f) => f.status === "approved").reduce((sum, f) => sum + f.amount, 0))}
               </p>
             </div>
             <div className="rounded-full bg-emerald-400/10 p-3">
@@ -132,37 +117,24 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-blue-400/20 bg-gradient-to-br from-blue-500/10 to-blue-600/5 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-slate-400">Total Additions</p>
-              <p className="mt-2 text-3xl font-bold text-white">
-                {formatCurrency(fundAdditions.filter((f) => f.status !== "rejected").reduce((sum, f) => sum + f.amount, 0))}
-              </p>
-            </div>
-            <div className="rounded-full bg-blue-400/10 p-3">
-              <Wallet className="text-blue-400" size={24} />
-            </div>
-          </div>
-        </div>
       </div>
 
       <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex gap-2">
             <button
-              onClick={() => setActiveTab("withdrawals")}
+              onClick={() => setActiveTab("pending")}
               className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition ${
-                activeTab === "withdrawals"
+                activeTab === "pending"
                   ? "bg-rose-600 text-white"
                   : "border border-slate-700 text-slate-400 hover:text-white"
               }`}
             >
-              <ArrowUpDown size={16} />
-              Withdrawals
-              {pendingWithdrawals.length > 0 && (
+              <Clock size={16} />
+              Pending approvals
+              {pendingAdditions.length > 0 && (
                 <span className="ml-1 rounded-full bg-amber-400 px-2 py-0.5 text-xs text-black">
-                  {pendingWithdrawals.length}
+                  {pendingAdditions.length}
                 </span>
               )}
             </button>
@@ -175,12 +147,7 @@ export default function AdminDashboard() {
               }`}
             >
               <TrendingUp size={16} />
-              Fund Additions
-              {pendingAdditions.length > 0 && (
-                <span className="ml-1 rounded-full bg-amber-400 px-2 py-0.5 text-xs text-black">
-                  {pendingAdditions.length}
-                </span>
-              )}
+              Fund addition history
             </button>
           </div>
 
@@ -235,7 +202,6 @@ export default function AdminDashboard() {
                     <td className="py-4 pr-4">
                       <div>
                         <p className="font-semibold text-white">{req.investor_accounts?.profiles?.full_name || "Unknown"}</p>
-                        <p className="text-xs text-slate-500">{req.investor_accounts?.profiles?.email}</p>
                       </div>
                     </td>
                     <td className="py-4 pr-4 font-mono text-cyan-400">
@@ -259,7 +225,7 @@ export default function AdminDashboard() {
                       {req.status === "pending" && (
                         <div className="flex gap-2">
                           <button
-                            onClick={() => handleAction(req.id, activeTab === "withdrawals" ? "withdrawal" : "fund_addition", "approve")}
+                            onClick={() => handleAction(req.id, "approve")}
                             disabled={processing === req.id}
                             className="flex items-center gap-1 rounded-lg bg-emerald-600/20 px-3 py-1.5 text-xs font-semibold text-emerald-400 hover:bg-emerald-600/30 disabled:opacity-50"
                           >
@@ -270,7 +236,7 @@ export default function AdminDashboard() {
                             onClick={() => {
                               const reason = prompt("Enter rejection reason:");
                               if (reason) {
-                                handleAction(req.id, activeTab === "withdrawals" ? "withdrawal" : "fund_addition", "reject", reason);
+                                handleAction(req.id, "reject", reason);
                               }
                             }}
                             disabled={processing === req.id}
@@ -280,16 +246,6 @@ export default function AdminDashboard() {
                             Reject
                           </button>
                         </div>
-                      )}
-                      {req.status === "approved" && activeTab === "withdrawals" && (
-                        <button
-                          onClick={() => handleAction(req.id, "withdrawal", "complete")}
-                          disabled={processing === req.id}
-                          className="flex items-center gap-1 rounded-lg bg-blue-600/20 px-3 py-1.5 text-xs font-semibold text-blue-400 hover:bg-blue-600/30 disabled:opacity-50"
-                        >
-                          <CheckCircle size={14} />
-                          Mark Complete
-                        </button>
                       )}
                       {(req.status === "approved" || req.status === "completed" || req.status === "rejected") && (
                         <span className="text-xs text-slate-500">

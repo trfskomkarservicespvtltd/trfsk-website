@@ -1,7 +1,7 @@
 import { createClient } from "@/app/lib/supabase/server";
 import AdminDashboard from "./AdminDashboard";
-import AdminForms from "./AdminForms";
 import RecordPayoutForm from "./forms/RecordPayoutForm";
+import OpportunitiesManager from "./forms/OpportunitiesManager";
 import Link from "next/link";
 
 export default async function AdminPage() {
@@ -26,10 +26,9 @@ export default async function AdminPage() {
 
   const entries = ledger ?? [];
   const total = (type: string) => entries.filter((entry) => entry.entry_type === type).reduce((sum, entry) => sum + Number(entry.amount), 0);
-  const currentCapital = total("contribution") + total("return") + total("adjustment") - total("withdrawal");
+  const currentCapital = total("contribution") + total("adjustment") - total("return") - total("withdrawal");
   const totalContributions = total("contribution");
   const totalReturns = total("return");
-  const totalWithdrawals = total("withdrawal");
 
   const money = (value: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value);
 
@@ -51,7 +50,7 @@ export default async function AdminPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Metric 
           label="Total Partners" 
           value={String(partnerAccounts.length)} 
@@ -72,19 +71,13 @@ export default async function AdminPage() {
           value={money(totalReturns)} 
           color="amber"
         />
-        <Metric 
-          label="Withdrawals" 
-          value={money(totalWithdrawals)} 
-          color="rose"
-        />
       </div>
 
       <AdminDashboard />
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <AdminForms accounts={formAccounts} />
-        <RecordPayoutForm accounts={formAccounts} />
-      </div>
+      <RecordPayoutForm accounts={formAccounts} />
+
+      <OpportunitiesManager />
 
       <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
         <div className="flex items-center justify-between">
@@ -122,7 +115,7 @@ export default async function AdminPage() {
                     </span>
                   </td>
                   <td className="py-3 pr-4 font-semibold">
-                    {entry.entry_type === "withdrawal" ? "-" : "+"}{money(Number(entry.amount))}
+                    {entry.entry_type === "contribution" || entry.entry_type === "adjustment" ? "+" : "-"}{money(Number(entry.amount))}
                   </td>
                   <td className="py-3 pr-4">{new Date(entry.effective_at).toLocaleDateString("en-IN")}</td>
                   <td className="py-3 text-slate-500">{entry.reference}</td>

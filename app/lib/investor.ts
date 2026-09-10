@@ -2,6 +2,7 @@ import { createClient } from "@/app/lib/supabase/server";
 
 type LedgerEntry = { id: string; entry_type: string; amount: number; effective_at: string; reference: string; notes: string | null };
 type ReturnPeriod = { id: string; period_start: string; period_end: string; return_amount: number; return_rate: number | null; status: string };
+type FundAddition = { id: string; amount: number; payment_method: string; payment_reference: string | null; status: string; rejection_reason: string | null; created_at: string; processed_at: string | null };
 type PartnerDetails = { address: string; city: string; state: string; pincode: string; pan: string; aadhaar: string; bank_name: string; bank_account_name: string; bank_account_no: string; ifsc: string };
 
 export async function getInvestorDashboard(userId: string) {
@@ -13,9 +14,10 @@ export async function getInvestorDashboard(userId: string) {
   ]);
   if (!account) return null;
 
-  const [{ data: ledger }, { data: returns }] = await Promise.all([
+  const [{ data: ledger }, { data: returns }, { data: fundAdditions }] = await Promise.all([
     supabase.from("ledger_entries").select("id, entry_type, amount, effective_at, reference, notes").eq("account_id", account.id).order("effective_at", { ascending: false }),
     supabase.from("return_periods").select("id, period_start, period_end, return_amount, return_rate, status").eq("account_id", account.id).eq("status", "approved").order("period_end", { ascending: false }),
+    supabase.from("fund_addition_requests").select("id, amount, payment_method, payment_reference, status, rejection_reason, created_at, processed_at").eq("account_id", account.id).order("created_at", { ascending: false }),
   ]);
 
   const entries = (ledger ?? []) as LedgerEntry[];
@@ -26,5 +28,5 @@ export async function getInvestorDashboard(userId: string) {
   const monthlyRate = account.rate_type === "annual" ? Number(account.rate) / 12 : Number(account.rate);
   const nextDue = new Date();
   nextDue.setMonth(nextDue.getMonth() + 1, account.due_day);
-  return { account, profile, details: details as PartnerDetails | null, entries, returns: (returns ?? []) as ReturnPeriod[], principal, returnsEarned, currentValue: principal + returnsEarned + adjustments - withdrawals, upcomingPayout: Math.max(principal + returnsEarned - withdrawals, 0) * (monthlyRate / 100), nextDueDate: nextDue.toISOString().slice(0, 10) };
+  return { account, profile, details: details as PartnerDetails | null, entries, returns: (returns ?? []) as ReturnPeriod[], fundAdditions: (fundAdditions ?? []) as FundAddition[], principal, returnsEarned, currentValue: principal + adjustments - returnsEarned - withdrawals, upcomingPayout: Math.max(principal + adjustments - withdrawals, 0) * (monthlyRate / 100), nextDueDate: nextDue.toISOString().slice(0, 10) };
 }
