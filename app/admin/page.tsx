@@ -24,7 +24,8 @@ export default async function AdminPage() {
     partnerName: names.get(account.user_id) || "Unnamed partner",
   }));
 
-  const entries = ledger ?? [];
+  const partnerAccountIds = new Set(partnerAccounts.map((account) => account.id));
+  const entries = (ledger ?? []).filter((entry) => partnerAccountIds.has(entry.account_id));
   const total = (type: string) => entries.filter((entry) => entry.entry_type === type).reduce((sum, entry) => sum + Number(entry.amount), 0);
   const currentCapital = total("contribution") + total("adjustment") - total("return") - total("withdrawal");
   const totalContributions = total("contribution");

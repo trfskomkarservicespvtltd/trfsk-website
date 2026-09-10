@@ -32,7 +32,12 @@ export default function LoginForm() {
     } else if (mode === "signup" && !result.data.session) {
       setMessage("Check your email to confirm your account, then come back to sign in.");
     } else {
-      router.push("/admin");
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", result.data.user?.id ?? "")
+        .maybeSingle();
+      router.push(profile?.role === "admin" ? "/admin" : "/investor");
       router.refresh();
     }
     setLoading(false);
