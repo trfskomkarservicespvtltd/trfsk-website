@@ -114,7 +114,7 @@ export default async function InvestorPage() {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <PartnerTools details={dashboard.details ?? {}} />
+        <PartnerTools details={dashboard.details ?? {}} kycStatus={account.kyc_status} />
         <PartnerExtras accountCode={account.account_code} />
       </div>
     </div>

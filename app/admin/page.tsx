@@ -10,7 +10,7 @@ export default async function AdminPage() {
   const [{ data: accounts }, { data: profiles }, { data: ledger }] = await Promise.all([
     supabase.from("investor_accounts").select("id, account_code, status, user_id, currency").order("created_at", { ascending: false }),
     supabase.from("profiles").select("id, full_name, role").eq("role", "investor"),
-    supabase.from("ledger_entries").select("id, account_id, entry_type, amount, effective_at, reference").order("effective_at", { ascending: false }).limit(100),
+    supabase.from("ledger_entries").select("id, account_id, entry_type, amount, effective_at, reference").order("effective_at", { ascending: false }),
   ]);
 
   const investorIds = new Set((profiles ?? []).map((profile) => profile.id));

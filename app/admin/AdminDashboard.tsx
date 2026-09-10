@@ -23,21 +23,21 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  useEffect(() => {
-    fetchRequests();
-  }, []);
-
   async function fetchRequests() {
     setLoading(true);
     try {
       const res = await fetch("/api/admin/funds");
       const data = await res.json();
       if (data.fund_additions) setFundAdditions(data.fund_additions);
-    } catch (error) {
+    } catch {
       console.error("Failed to fetch requests");
     }
     setLoading(false);
   }
+
+  useEffect(() => {
+    void fetchRequests();
+  }, []);
 
   async function handleAction(id: string, action: "approve" | "reject", rejectionReason?: string) {
     setProcessing(id);
@@ -50,7 +50,7 @@ export default function AdminDashboard() {
       if (res.ok) {
         fetchRequests();
       }
-    } catch (error) {
+    } catch {
       console.error("Action failed");
     }
     setProcessing(null);

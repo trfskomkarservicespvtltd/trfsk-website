@@ -32,6 +32,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <Link href="/admin/partners" className="text-sm font-medium text-slate-400 hover:text-white">
               Partners
             </Link>
+            <Link href="/admin/kyc" className="text-sm font-medium text-slate-400 hover:text-white">
+              KYC Approvals
+            </Link>
             <Link href="/admin/transactions" className="text-sm font-medium text-slate-400 hover:text-white">
               Transactions
             </Link>
