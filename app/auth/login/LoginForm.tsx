@@ -37,7 +37,7 @@ export default function LoginForm() {
         .select("role")
         .eq("id", result.data.user?.id ?? "")
         .maybeSingle();
-      router.push(profile?.role === "admin" ? "/admin" : "/investor");
+      router.push(profile?.role === "admin" ? "/home" : "/investor");
       router.refresh();
     }
     setLoading(false);

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X, ChevronDown, LayoutDashboard, Receipt, User, LogOut, Settings, Shield } from "lucide-react";
+import { Menu, X, ChevronDown, LayoutDashboard, Receipt, User, LogOut, Settings, Shield, Home } from "lucide-react";
 import NavLink from "../NavLink";
 import { createClient } from "@/app/lib/supabase/browser";
 
@@ -85,6 +85,7 @@ export default function Navbar() {
   ];
 
   const adminLinks: NavItem[] = [
+    { href: "/home", label: "Home", icon: Home },
     { href: "/admin", label: "Control Panel", icon: Shield },
     { href: "/admin/partners", label: "All Partners", icon: User },
     { href: "/admin/transactions", label: "All Transactions", icon: Receipt },
