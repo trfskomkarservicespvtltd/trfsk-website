@@ -78,11 +78,12 @@ export default function Navbar() {
     { href: "/partnerships", label: "Partnerships" },
   ];
 
-  const partnerLinks: NavItem[] = [
+const partnerLinks: NavItem[] = [
     { href: "/investor", label: "Dashboard", icon: LayoutDashboard },
     { href: "/investor/transactions", label: "Transactions", icon: Receipt },
     { href: "/investor/profile", label: "Profile", icon: User },
-  ];
+    { href: "/home", label: "Home", icon: Home },
+];
 
   const adminLinks: NavItem[] = [
     { href: "/home", label: "Home", icon: Home },

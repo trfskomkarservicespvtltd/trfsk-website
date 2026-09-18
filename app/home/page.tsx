@@ -1,9 +1,16 @@
-import { requireAdmin } from "@/app/lib/auth";
+import { requireUser } from "@/app/lib/auth";
 import { getPerformanceEntries } from "@/app/lib/performance";
 import HomeDashboard from "./HomeDashboard";
+import { createClient } from "@/app/lib/supabase/browser";
 
 export default async function HomePage() {
-  await requireAdmin();
+  await requireUser();
+  const supabase = createClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .single();
+  const isAdmin = profile?.role === "admin";
   const entries = await getPerformanceEntries();
-  return <HomeDashboard entries={entries} isAdmin />;
+  return <HomeDashboard entries={entries} isAdmin={isAdmin} />;
 }
