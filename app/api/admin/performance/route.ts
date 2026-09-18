@@ -91,3 +91,28 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Could not save performance entry" }, { status: 401 });
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const admin = await requireAdmin();
+    const supabase = await createClient();
+    const body = await request.json();
+    const { ids, source } = body;
+
+    if (ids && Array.isArray(ids) && ids.length > 0) {
+      const { error } = await supabase.from("performance_entries").delete().in("id", ids);
+      if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+      return NextResponse.json({ success: true, deleted: ids.length });
+    }
+
+    if (source === "excel") {
+      const { error } = await supabase.from("performance_entries").delete().eq("source", "excel");
+      if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+      return NextResponse.json({ success: true, deleted: "all excel records" });
+    }
+
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  } catch {
+    return NextResponse.json({ error: "Could not delete performance entries" }, { status: 401 });
+  }
+}

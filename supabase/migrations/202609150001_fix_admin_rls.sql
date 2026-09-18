@@ -1,16 +1,16 @@
--- Update is_admin() function to also check for configured admin email
--- This matches the logic in app/lib/auth.ts
+-- Update is_admin() function to check only the role column
+-- (profiles table has no 'email' column; admin status is managed via the 'role' field)
 
 create or replace function public.is_admin()
 returns boolean language sql stable security definer set search_path = public as $$
   select exists (
     select 1 from public.profiles 
     where id = auth.uid() 
-    and (role = 'admin' or email = 'omkar@admin.com')
+    and role = 'admin'
   );
 $$;
 
--- Also update the profiles policy to allow admin email to read all profiles
+-- Profiles policies remain role‑based
 drop policy if exists "Users read own profile" on public.profiles;
 create policy "Users read own profile" on public.profiles for select 
   using (id = auth.uid() or public.is_admin());

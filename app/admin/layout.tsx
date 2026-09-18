@@ -44,9 +44,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </nav>
 
           <div className="flex items-center gap-4">
-            <Link href="/investor" className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800">
-              Partner View
-            </Link>
             <SignOutButton />
           </div>
         </div>
