@@ -17,6 +17,14 @@ const dateValue = (value: unknown) => {
   return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString().slice(0, 10);
 };
 
+const typeFromValue = (value: unknown) => {
+  const text = String(value ?? "").toLowerCase();
+  if (text.includes("repay")) return "repayment";
+  if (text.includes("payout") || text.includes("roi") || text.includes("return")) return "payout";
+  if (text.includes("adjust")) return "adjustment";
+  return "investment";
+};
+
 export async function POST(request: Request) {
   try {
     const admin = await requireAdmin();
@@ -32,15 +40,57 @@ export async function POST(request: Request) {
       const sheetRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets[sheetName], { defval: "" });
       for (const row of sheetRows) {
         const normalized = Object.fromEntries(Object.entries(row).map(([key, value]) => [key.toLowerCase().trim(), value]));
-        const transactionDate = dateValue(normalized["transaction_date"] ?? normalized["date"]);
+        
+        // Map actual column names from the Excel file
+        const partnerName = String(
+          normalized["agreement name"] ?? 
+          normalized["agreement name "] ?? 
+          normalized["agreement name "] ?? 
+          normalized["agreement name "] ?? 
+          normalized["agreement name "] ?? 
+          normalized["agreement name "] ?? 
+          normalized["agreement name "] ?? 
+          normalized["agreement name "] ?? 
+          ""
+        ).trim() || sheetName;
+        
+        // Transaction type from "Transaction types" column
+        const transactionType = String(normalized["transaction types"] ?? "").toLowerCase().includes("repay") ? "repayment" : "investment";
+        
+        // Date: prefer "date of investment" / "Date of Investment" / "Date of Agreement", fall back to "repayment dates" / "Repayment Dates"
+        const investmentDate = dateValue(normalized["date of investment"] ?? normalized["date of investment"] ?? normalized["date of agreement"] ?? normalized["date of agreement"]);
+        const repaymentDate = dateValue(normalized["repayment dates"] ?? normalized["repayment dates"]);
+        
+        // Investment amount
+        const investmentAmount = numberValue(normalized["amount of investment"] ?? normalized["amount of investment"] ?? 0);
+        
+        // Payout amount from "repayment amount"
+        const payoutAmount = numberValue(normalized["repayment amount"] ?? normalized["repayment amount"] ?? 0);
+        
+        // ROI from various possible columns
+        const roi = numberValue(normalized["roi"] ?? normalized["roi"] ?? normalized["paid roi %"] ?? normalized["paid roi %"] ?? 0) || null;
+        
+        // Use investment date if available, otherwise repayment date
+        const transactionDate = investmentDate || dateValue(normalized["date of investment"] ?? normalized["date of investment"]);
+        
         if (!transactionDate) continue;
+        
+        // Determine if this is a repayment row (has repayment date or repayment amount but no investment amount)
+        const hasInvestment = numberValue(normalized["amount of investment"] ?? 0) > 0;
+        const hasRepayment = numberValue(normalized["repayment amount"] ?? 0) > 0;
+        const transactionTypeFromData = !hasInvestment && hasRepayment ? "repayment" : "investment";
+        
+        // For repayment rows, use repayment date
+        const finalDate = transactionTypeFromData === "repayment" ? (dateValue(normalized["repayment dates"] ?? normalized["repayment dates"]) || transactionDate) : transactionDate;
+        if (!finalDate) continue;
+        
         rows.push({
-          partner_name: String(normalized["partner_name"] ?? "").trim(),
-          transaction_type: "investment",
-          transaction_date: transactionDate,
-          investment_amount: numberValue(normalized["investment_amount"] ?? normalized["investment"] ?? 0),
-          payout_amount: numberValue(normalized["payout_amount"] ?? normalized["payout"] ?? 0),
-          roi: numberValue(normalized["roi"]) || null,
+          partner_name: String(normalized["agreement name"] ?? normalized["agreement name"] ?? "").trim() || sheetName,
+          transaction_type: transactionTypeFromData,
+          transaction_date: finalDate,
+          investment_amount: numberValue(normalized["amount of investment"] ?? normalized["amount of investment"] ?? 0),
+          payout_amount: numberValue(normalized["repayment amount"] ?? normalized["repayment amount"] ?? 0),
+          roi: numberValue(normalized["roi"] ?? normalized["roi"] ?? normalized["paid roi %"] ?? normalized["paid roi %"]) || null,
           notes: String(normalized["notes"] ?? "").trim() || null,
           source: "excel",
           created_by: admin.id,
