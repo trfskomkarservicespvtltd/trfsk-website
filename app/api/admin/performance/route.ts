@@ -3,14 +3,6 @@ import { requireAdmin } from "@/app/lib/auth";
 import { createClient } from "@/app/lib/supabase/server";
 import * as XLSX from "xlsx";
 
-const typeFromValue = (value: unknown) => {
-  const text = String(value ?? "").toLowerCase();
-  if (text.includes("repay")) return "repayment";
-  if (text.includes("payout") || text.includes("roi") || text.includes("return")) return "payout";
-  if (text.includes("adjust")) return "adjustment";
-  return "investment";
-};
-
 const numberValue = (value: unknown) => {
   if (typeof value === "number") return value;
   const parsed = Number(String(value ?? "").replace(/[^0-9.-]/g, ""));
@@ -43,8 +35,8 @@ export async function POST(request: Request) {
         const transactionDate = dateValue(normalized["transaction_date"] ?? normalized["date"]);
         if (!transactionDate) continue;
         rows.push({
-          partner_name: String(normalized["partner_name"] ?? sheetName).trim(),
-          transaction_type: typeFromValue(normalized["transaction_type"] ?? normalized["type"]),
+          partner_name: String(normalized["partner_name"] ?? "").trim(),
+          transaction_type: "investment",
           transaction_date: transactionDate,
           investment_amount: numberValue(normalized["investment_amount"] ?? normalized["investment"] ?? 0),
           payout_amount: numberValue(normalized["payout_amount"] ?? normalized["payout"] ?? 0),
