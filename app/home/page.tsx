@@ -1,11 +1,11 @@
 import { requireUser } from "@/app/lib/auth";
 import { getPerformanceEntries } from "@/app/lib/performance";
 import HomeDashboard from "./HomeDashboard";
-import { createClient } from "@/app/lib/supabase/browser";
+import { createClient } from "@/app/lib/supabase/server";
 
 export default async function HomePage() {
   await requireUser();
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const { data: profile } = await supabase
     .from("profiles")
