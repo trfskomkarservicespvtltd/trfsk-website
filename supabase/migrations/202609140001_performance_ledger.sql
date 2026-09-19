@@ -24,3 +24,6 @@ drop policy if exists "Authenticated users view performance entries" on public.p
 drop policy if exists "Admins view performance entries" on public.performance_entries;
 create policy "Admins view performance entries" on public.performance_entries
   for select using (public.is_admin());
+
+create policy "Authenticated users view performance entries" on public.performance_entries
+  for select using (auth.role() = 'authenticated');
