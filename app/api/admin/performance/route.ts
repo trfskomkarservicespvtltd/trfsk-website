@@ -3,12 +3,12 @@ import { requireAdmin } from "@/app/lib/auth";
 import { createClient } from "@/app/lib/supabase/server";
 import * as XLSX from "xlsx";
 
-const typeFromValue = (value: unknown) => {
-  const text = String(value ?? "").toLowerCase();
-  if (text.includes("repay")) return "repayment";
-  if (text.includes("payout") || text.includes("roi") || text.includes("return")) return "payout";
-  if (text.includes("adjust")) return "adjustment";
-  return "investment";
+const validTypes = ["investment", "payout", "return", "repayment", "adjustment"];
+
+const normalizeType = (value: unknown): string => {
+  const text = String(value ?? "").toLowerCase().trim();
+  const found = validTypes.find(t => t === text);
+  return found || "investment";
 };
 
 const numberValue = (value: unknown) => {
@@ -40,24 +40,22 @@ export async function POST(request: Request) {
       const sheetRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets[sheetName], { defval: "" });
       for (const row of sheetRows) {
         const normalized = Object.fromEntries(Object.entries(row).map(([key, value]) => [key.toLowerCase().trim(), value]));
-        const transactionDate = dateValue(normalized["date of investment"] ?? normalized.date ?? normalized["transaction date"] ?? normalized["repayment dates"]);
+        const transactionDate = dateValue(normalized["transaction_date"] ?? normalized["date"]);
         if (!transactionDate) continue;
-        const investment = numberValue(normalized["amount of investment"] ?? normalized.investment ?? normalized.capital);
-        const payout = numberValue(normalized["repayment amount"] ?? normalized.repayment ?? normalized.payout ?? normalized.roi);
         rows.push({
-          partner_name: sheetName,
-          transaction_type: typeFromValue(normalized["transaction type"] ?? normalized["transactions type"] ?? normalized.type),
+          partner_name: String(normalized["partner_name"] ?? sheetName).trim(),
+          transaction_type: normalizeType(normalized["transaction_type"] ?? normalized["type"]),
           transaction_date: transactionDate,
-          investment_amount: investment,
-          payout_amount: payout,
-          roi: numberValue(normalized.roi) || null,
-          notes: String(normalized.notes ?? normalized["agreement name"] ?? normalized["agreement name "] ?? "") || null,
+          investment_amount: numberValue(normalized["investment_amount"] ?? normalized["investment"] ?? 0),
+          payout_amount: numberValue(normalized["payout_amount"] ?? normalized["payout"] ?? 0),
+          roi: numberValue(normalized["roi"]) || null,
+          notes: String(normalized["notes"] ?? "").trim() || null,
           source: "excel",
           created_by: admin.id,
         });
       }
     }
-    if (!rows.length) return NextResponse.json({ error: "No dated performance rows found" }, { status: 400 });
+    if (!rows.length) return NextResponse.json({ error: "No valid performance rows found" }, { status: 400 });
     const { error } = await supabase.from("performance_entries").insert(rows);
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
     return NextResponse.json({ success: true, imported: rows.length, sheets: workbook.SheetNames.length });
