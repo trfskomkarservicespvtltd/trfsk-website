@@ -34,7 +34,10 @@ export default async function AdminTransactionsPage() {
     Number(entry.investment_amount) > 0 ? { id: `${entry.id}-investment`, entry_type: "contribution", amount: entry.investment_amount, effective_at: entry.transaction_date, reference: `performance:${entry.id}`, notes: entry.notes, partner_name: entry.partner_name, account_id: entry.account_id } : null,
     Number(entry.payout_amount) > 0 ? { id: `${entry.id}-payout`, entry_type: "return", amount: entry.payout_amount, effective_at: entry.transaction_date, reference: `performance:${entry.id}`, notes: entry.notes, partner_name: entry.partner_name, account_id: entry.account_id } : null,
   ].filter(Boolean));
-  const allTransactions = [...(ledger ?? []).map((entry) => ({ ...entry, partner_name: null })), ...performanceRows].filter(Boolean).sort((a, b) => new Date(b.effective_at).getTime() - new Date(a.effective_at).getTime());
+  const allTransactions = [...(ledger ?? []).map((entry) => ({ ...entry, partner_name: null })), ...performanceRows].filter(Boolean).sort((a, b) => {
+    if (!a || !b) return 0;
+    return new Date(b.effective_at).getTime() - new Date(a.effective_at).getTime();
+  });
   const total = (type: string) => allTransactions.filter((e) => e.entry_type === type).reduce((sum, e) => sum + Number(e.amount), 0);
 
   const entryTypeColors: Record<string, { bg: string; text: string }> = {
