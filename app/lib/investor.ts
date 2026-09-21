@@ -24,7 +24,7 @@ export async function getInvestorDashboard(userId: string) {
   const performanceEntries = (performance ?? []).flatMap((entry) => [
     Number(entry.investment_amount) > 0 ? { id: `${entry.id}-investment`, entry_type: "contribution", amount: Number(entry.investment_amount), effective_at: `${entry.transaction_date}T00:00:00.000Z`, reference: `performance:${entry.id}`, notes: entry.notes } : null,
     Number(entry.payout_amount) > 0 ? { id: `${entry.id}-payout`, entry_type: "return", amount: Number(entry.payout_amount), effective_at: `${entry.transaction_date}T00:00:00.000Z`, reference: `performance:${entry.id}`, notes: entry.notes } : null,
-  ].filter((entry): entry is LedgerEntry => entry !== null);
+  ].filter((entry) => entry !== null).map((entry) => entry as LedgerEntry));
   const entries = [...((ledger ?? []) as LedgerEntry[]), ...performanceEntries].sort((a, b) => new Date(b.effective_at).getTime() - new Date(a.effective_at).getTime());
   const principal = entries.reduce((total, entry) => total + (entry.entry_type === "contribution" ? entry.amount : 0), 0);
   const returnsEarned = entries.reduce((total, entry) => total + (entry.entry_type === "return" ? entry.amount : 0), 0);
