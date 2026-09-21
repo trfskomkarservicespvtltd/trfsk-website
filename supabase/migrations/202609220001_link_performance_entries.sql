@@ -6,7 +6,7 @@ create index if not exists performance_entries_account_idx on public.performance
 update public.performance_entries entry
 set account_id = matches.account_id
 from (
-  select pe.id, min(ia.id) as account_id
+  select pe.id, (array_agg(ia.id))[1] as account_id
   from public.performance_entries pe
   join public.profiles p on lower(trim(p.full_name)) = lower(trim(pe.partner_name))
   join public.investor_accounts ia on ia.user_id = p.id
