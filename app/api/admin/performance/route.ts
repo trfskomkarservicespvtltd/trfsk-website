@@ -112,10 +112,18 @@ export async function PUT(request: Request) {
     const admin = await requireAdmin();
     const body = await request.json();
     const transactionDate = dateValue(body.transaction_date);
-    if (!body.partner_name || !transactionDate) return NextResponse.json({ error: "Partner name and valid date are required" }, { status: 400 });
+    if (!body.account_id || !transactionDate) return NextResponse.json({ error: "Partner account and valid date are required" }, { status: 400 });
     const supabase = await createClient();
+    const { data: account } = await supabase
+      .from("investor_accounts")
+      .select("id, profiles!inner(full_name)")
+      .eq("id", String(body.account_id))
+      .maybeSingle();
+    if (!account) return NextResponse.json({ error: "Partner account not found" }, { status: 404 });
+    const profile = Array.isArray(account.profiles) ? account.profiles[0] : account.profiles;
     const { data, error } = await supabase.from("performance_entries").insert({
-      partner_name: String(body.partner_name).trim(),
+      account_id: account.id,
+      partner_name: profile?.full_name || "Unnamed partner",
       transaction_type: typeFromValue(body.transaction_type),
       transaction_date: transactionDate,
       investment_amount: numberValue(body.investment_amount),

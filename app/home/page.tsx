@@ -15,5 +15,12 @@ export default async function HomePage() {
   const configuredAdminEmail = (process.env.ADMIN_PORTAL_EMAIL ?? "omkar@admin.com").toLowerCase();
   const isAdmin = profile?.role === "admin" || user?.email?.toLowerCase() === configuredAdminEmail;
   const entries = await getPerformanceEntries();
-  return <HomeDashboard entries={entries} isAdmin={isAdmin} />;
+  const { data: accounts } = isAdmin
+    ? await supabase.from("investor_accounts").select("id, profiles!inner(full_name)").order("created_at", { ascending: false })
+    : { data: [] };
+  const partnerAccounts = (accounts ?? []).map((account) => {
+    const profile = Array.isArray(account.profiles) ? account.profiles[0] : account.profiles;
+    return { id: account.id, name: profile?.full_name || "Unnamed partner" };
+  });
+  return <HomeDashboard entries={entries} isAdmin={isAdmin} partnerAccounts={partnerAccounts} />;
 }

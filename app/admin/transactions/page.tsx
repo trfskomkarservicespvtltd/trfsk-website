@@ -23,10 +23,19 @@ export default async function AdminTransactionsPage() {
       )
     `)
     .order("created_at", { ascending: false });
+  const { data: performance } = await supabase
+    .from("performance_entries")
+    .select("id, account_id, partner_name, transaction_type, transaction_date, investment_amount, payout_amount, roi, notes, source")
+    .order("transaction_date", { ascending: false });
 
   const money = (value: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value);
 
-  const total = (type: string) => (ledger ?? []).filter((e) => e.entry_type === type).reduce((sum, e) => sum + Number(e.amount), 0);
+  const performanceRows = (performance ?? []).flatMap((entry) => [
+    Number(entry.investment_amount) > 0 ? { id: `${entry.id}-investment`, entry_type: "contribution", amount: entry.investment_amount, effective_at: entry.transaction_date, reference: `performance:${entry.id}`, notes: entry.notes, partner_name: entry.partner_name, account_id: entry.account_id } : null,
+    Number(entry.payout_amount) > 0 ? { id: `${entry.id}-payout`, entry_type: "return", amount: entry.payout_amount, effective_at: entry.transaction_date, reference: `performance:${entry.id}`, notes: entry.notes, partner_name: entry.partner_name, account_id: entry.account_id } : null,
+  ].filter(Boolean));
+  const allTransactions = [...(ledger ?? []).map((entry) => ({ ...entry, partner_name: null })), ...performanceRows].sort((a, b) => new Date(b.effective_at).getTime() - new Date(a.effective_at).getTime());
+  const total = (type: string) => allTransactions.filter((e) => e.entry_type === type).reduce((sum, e) => sum + Number(e.amount), 0);
 
   const entryTypeColors: Record<string, { bg: string; text: string }> = {
     contribution: { bg: "bg-emerald-400/10", text: "text-emerald-300" },
@@ -95,7 +104,7 @@ export default async function AdminTransactionsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
-                {(ledger ?? []).map((entry) => {
+                {allTransactions.map((entry) => {
                   const colors = entryTypeColors[entry.entry_type] || { bg: "bg-slate-400/10", text: "text-slate-300" };
                   const account = Array.isArray(entry.investor_accounts) ? entry.investor_accounts[0] : entry.investor_accounts;
                   const profile = account?.profiles?.[0];
@@ -105,7 +114,7 @@ export default async function AdminTransactionsPage() {
                         {new Date(entry.effective_at).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}
                       </td>
                       <td className="px-6 py-4 font-semibold text-white">
-                        {profile?.full_name || "Unknown"}
+                        {entry.partner_name || profile?.full_name || "Unknown"}
                       </td>
                       <td className="px-6 py-4 font-mono text-cyan-400">
                         {account?.account_code || "N/A"}

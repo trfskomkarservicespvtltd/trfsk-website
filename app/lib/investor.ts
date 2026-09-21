@@ -14,13 +14,18 @@ export async function getInvestorDashboard(userId: string) {
   ]);
   if (!account) return null;
 
-  const [{ data: ledger }, { data: returns }, { data: fundAdditions }] = await Promise.all([
+  const [{ data: ledger }, { data: performance }, { data: returns }, { data: fundAdditions }] = await Promise.all([
     supabase.from("ledger_entries").select("id, entry_type, amount, effective_at, reference, notes").eq("account_id", account.id).order("effective_at", { ascending: false }),
+    supabase.from("performance_entries").select("id, transaction_type, transaction_date, investment_amount, payout_amount, notes").eq("account_id", account.id).order("transaction_date", { ascending: false }),
     supabase.from("return_periods").select("id, period_start, period_end, return_amount, return_rate, status").eq("account_id", account.id).eq("status", "approved").order("period_end", { ascending: false }),
     supabase.from("fund_addition_requests").select("id, amount, payment_method, payment_reference, status, rejection_reason, created_at, processed_at").eq("account_id", account.id).order("created_at", { ascending: false }),
   ]);
 
-  const entries = (ledger ?? []) as LedgerEntry[];
+  const performanceEntries = (performance ?? []).flatMap((entry) => [
+    Number(entry.investment_amount) > 0 ? { id: `${entry.id}-investment`, entry_type: "contribution", amount: Number(entry.investment_amount), effective_at: `${entry.transaction_date}T00:00:00.000Z`, reference: `performance:${entry.id}`, notes: entry.notes } : null,
+    Number(entry.payout_amount) > 0 ? { id: `${entry.id}-payout`, entry_type: "return", amount: Number(entry.payout_amount), effective_at: `${entry.transaction_date}T00:00:00.000Z`, reference: `performance:${entry.id}`, notes: entry.notes } : null,
+  ].filter((entry): entry is LedgerEntry => entry !== null);
+  const entries = [...((ledger ?? []) as LedgerEntry[]), ...performanceEntries].sort((a, b) => new Date(b.effective_at).getTime() - new Date(a.effective_at).getTime());
   const principal = entries.reduce((total, entry) => total + (entry.entry_type === "contribution" ? entry.amount : 0), 0);
   const returnsEarned = entries.reduce((total, entry) => total + (entry.entry_type === "return" ? entry.amount : 0), 0);
   const adjustments = entries.reduce((total, entry) => total + (entry.entry_type === "adjustment" ? entry.amount : 0), 0);
